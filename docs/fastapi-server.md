@@ -98,7 +98,9 @@ app = create_app(pets=Pets())
 Generation ends by printing to stderr the `uv add` command that adds the runtime dependencies of the package to your project,
 including what the models import, such as `email-validator` for `format: email` and `python-ulid` for
 `format: ulid`. It names only the minimum version each one needs, so uv adds the latest release and your lock file
-keeps it. Run it, then start the application with an ASGI server:
+keeps it; the minimum is `pydantic>=2.13.5`, and `pydantic>=2.14` when `--target-pydantic-version 2.14` with
+`--use-missing-sentinel` makes the models import `MISSING` from `pydantic`. Run it, then start the application with
+an ASGI server:
 
 ```bash
 uv add uvicorn
@@ -435,19 +437,25 @@ an empty body with an undeclared Content-Type, while an empty body without a Con
 one, answers `422` with a `missing` record at `["body"]`. The JSON is read as UTF-8 without a byte order mark: a body
 that starts with one, or is UTF-16, answers `422` with `json_invalid`, where FastAPI's own reading accepts both.
 
-A multipart part is text when the type of its member, or of the member's items for an array, has one scalar kind,
-with one part for each item of an array. A part of any other member is JSON, as the generated client sends it: an
-object, a mapping, each item of an array of objects, or a union without one scalar kind. So is a part of a member
-whose `encoding` names one JSON media type and no style, such as `contentType: application/json`, a scalar included.
-A JSON part is parsed by `TypeAdapter.validate_json` of the member's type, or of its items' type, whatever media type
-the part names and whether it arrives as a field or as a file. A part that is not JSON, or that the type rejects,
-answers `422` with its records at `["body", name]`, or at `["body", name, index]` for a member that repeats, before
-the rest of the body is validated. An `encoding` with any other media type still needs `--server-body-mode request`.
+A multipart part is text when the type of its member, or of the member's items when that type is an array, has one
+scalar kind, with one part for each item of an array. A part of any other member is JSON, as the generated client
+sends it: an object, a mapping, each item of an array of objects, a union of a string and an object, an enum of mixed
+kinds, or a union of an array and another type, whose array is one part. So is a part of a member whose `encoding`
+names one JSON media type and no style, such as `contentType: application/json`, a scalar included. A JSON part is
+parsed by `TypeAdapter.validate_json` of the member's type, or of its items' type, whatever media type the part names
+and whether it arrives as a field or as a file. A part that is not JSON, or that the type rejects, answers `422` with
+its records at `["body", name]`, or at `["body", name, index]` for a member that repeats, before the rest of the body
+is validated. A part of a property the schema does not declare is read as text, whatever `additionalProperties` says.
 
 A URL-encoded form carries text alone. For a member without one scalar kind, such as an object, an array of objects,
-or `type: [integer, boolean]`, generation stops with `A parameter value needs one unambiguous scalar kind`, as it
-does for the generated client and for a parameter; `--server-body-mode request` passes such a body to the method
-unread.
+or `type: [integer, boolean]`, declared by the schema or by a schema it combines with `allOf`, generation stops with
+`A parameter value needs one unambiguous scalar kind`, as it does for the generated client and for a parameter,
+unless an `encoding` gives the member a style.
+
+The adapters read no `encoding` that names another media type, part headers, `allowReserved`, or a style other than
+the default `form` with `explode: true`, and none that gives any style to a member without one scalar kind, which
+the client spreads over several pairs or parts: generation stops with an error that names the encoding.
+`--server-body-mode request` passes any such body to the method unread.
 
 The router splits a request path at the slashes the request sends, so a percent-encoded slash (`%2F`) stays inside
 its path parameter, whose value receives `/`, of whatever style; FastAPI alone routes by the decoded path, where

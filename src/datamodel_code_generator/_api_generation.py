@@ -482,7 +482,7 @@ class _Planner:
                     Diagnostic(
                         code="E_PATH_COLLISION",
                         severity="error",
-                        stage="ownership",
+                        stage="publication",
                         message=message,
                         artifact_path=shown(artifact.path, self.cwd).as_posix(),
                     )

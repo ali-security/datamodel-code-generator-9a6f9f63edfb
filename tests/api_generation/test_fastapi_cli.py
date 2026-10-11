@@ -1184,6 +1184,41 @@ def test_fastapi_cli_model_and_form_dependencies(
     assert_output(capsys.readouterr().err, EXPECTED / "cli" / "model-dependencies.txt")
 
 
+@pytest.mark.parametrize(
+    ("name", "arguments"),
+    [
+        ("target-2.14-missing", ["--target-pydantic-version", "2.14", "--use-missing-sentinel"]),
+        ("target-2.14", ["--target-pydantic-version", "2.14"]),
+        ("unset-target-missing", ["--use-missing-sentinel"]),
+    ],
+)
+def test_fastapi_cli_pydantic_dependency(
+    name: str,
+    arguments: list[str],
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Print the pydantic requirement that the pydantic imports of the models need, next to those imports."""
+    monkeypatch.chdir(tmp_path)
+    run_main_and_assert(
+        input_path=Path("contacts.yaml"),
+        output_path=Path("models.py"),
+        input_file_type="openapi",
+        extra_args=_server(*arguments),
+        copy_files=[(SOURCE / "install" / "contacts.yaml", tmp_path / "contacts.yaml")],
+        skip_code_validation=True,
+    )
+    imports = [
+        line
+        for line in Path("models.py").read_text(encoding="utf-8").splitlines(keepends=True)
+        if "MISSING" in line and "import" in line
+    ]
+    assert_output(
+        "".join((capsys.readouterr().err, *imports)), EXPECTED / "cli" / "pydantic-dependency" / f"{name}.txt"
+    )
+
+
 def test_fastapi_cli_nested_models_example(
     tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:

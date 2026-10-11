@@ -1,0 +1,65 @@
+openapi: 3.1.0
+info:
+  title: Kinds of form-data parts
+  version: "1"
+servers:
+  - url: https://api.example.com
+paths:
+  /choices:
+    post:
+      operationId: sendChoices
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/Choices"}
+      responses:
+        "204":
+          description: Stored.
+    get:
+      operationId: readChoices
+      responses:
+        "200":
+          description: The stored choices.
+          content:
+            multipart/form-data:
+              schema: {$ref: "#/components/schemas/Choices"}
+  /choice-files:
+    post:
+      operationId: sendChoiceFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/ChoiceFiles"}
+      responses:
+        "204":
+          description: Stored.
+    get:
+      operationId: readChoiceFiles
+      responses:
+        "200":
+          description: The stored choices and their file.
+          content:
+            multipart/form-data:
+              schema: {$ref: "#/components/schemas/ChoiceFiles"}
+components:
+  schemas:
+    Choices:
+      type: object
+      properties:
+        either: {anyOf: [{$ref: "#/components/schemas/Filter"}, {type: string}]}
+        level: {enum: [1, a]}
+        words: {anyOf: [{type: array, items: {type: string}}, {type: string}]}
+        lists: {anyOf: [{type: array, items: {type: integer}}, {type: array, items: {type: string}}]}
+        filters: {type: array, items: {$ref: "#/components/schemas/Filter"}}
+        tags: {type: array, items: {type: string}}
+        count: {type: integer}
+    ChoiceFiles:
+      allOf:
+        - {$ref: "#/components/schemas/Choices"}
+        - {type: object, properties: {file: {type: string, format: binary}}}
+    Filter:
+      type: object
+      properties:
+        color: {type: string}
