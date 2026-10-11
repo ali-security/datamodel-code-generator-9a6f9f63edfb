@@ -135,7 +135,8 @@ class UploadOptions:
 class WSOptions:
     """WebSocket limits; durations are finite positive seconds, None removes a limit where it is allowed.
 
-    `idle_timeout` bounds a receive waiting for a message and inherits the native read timeout. `total_timeout`, which
+    `idle_timeout` bounds a receive waiting for a message and inherits the native read timeout. `max_message_bytes` is
+    passed to HTTPX2 as its message size limit, whose own default applies while it is unset. `total_timeout`, which
     also takes 0, bounds the whole session in seconds, counted from its start.
     """
 

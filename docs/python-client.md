@@ -409,7 +409,7 @@ booleans. Durations are finite numbers of seconds, excluding booleans; integers 
 | `UploadOptions` | `chunk_bytes` | `8388608` | Positive integer |
 | `CacheOptions` | `max_ttl` | `300` seconds | Positive duration: the cap on any entry's freshness |
 | `WSOptions` | `open_timeout`, `idle_timeout`, `ping_interval`, `pong_timeout` | See [WebSocket limits](#websocket-limits) | Positive duration or `None` |
-| | `max_message_bytes` | `1048576` | Positive integer |
+| | `max_message_bytes` | HTTPX2's default (64 KiB in 2.13) | Positive integer |
 | Every type but `CacheOptions` | `total_timeout` | `600` seconds for polling, no limit otherwise | Nonnegative duration or `None`: the helper session's budget from its start |
 
 
@@ -2172,12 +2172,12 @@ remaining duration as their timeout:
 |---|---|---|
 | `WSOptions.open_timeout` | 5 seconds, also capped by the connect, read, write, and pool timeouts and the deadline | No open limit |
 | `WSOptions.idle_timeout` | The native read timeout | No idle limit |
-| `WSOptions.max_message_bytes` | 1 MiB per message, HTTPX2's `max_message_size_bytes` | Not allowed |
+| `WSOptions.max_message_bytes` | HTTPX2's default (64 KiB in 2.13); a set value is passed as its `max_message_size_bytes` | Not allowed |
 | `WSOptions.ping_interval`, `pong_timeout` | 20 seconds each, HTTPX2's keepalive settings; `pong_timeout` also bounds `ping()` | No keepalive pings |
 | `WSOptions.total_timeout` | None | No session budget |
 
-A message over `max_message_bytes` raises `ProtocolDataError` with the reason `too_large` after HTTPX2 closed the
-connection with 1009. A receive that waits longer than the idle timeout raises `APITimeoutError` with the reason
+A message over `max_message_bytes`, or over HTTPX2's default while that is unset, raises `ProtocolDataError` with the
+reason `too_large` after HTTPX2 closed the connection with 1009. A receive that waits longer than the idle timeout raises `APITimeoutError` with the reason
 `phase_timeout` and closes with 1001, as does a ping whose pong does not arrive within the pong timeout; another
 failure closes with 1011. A missed keepalive pong makes HTTPX2 close with 1011, and the next `receive` raises
 `APIConnectionError`. The session deadline bounds every wait and raises `APITimeoutError` with
