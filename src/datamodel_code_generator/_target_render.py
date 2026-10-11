@@ -6,6 +6,9 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Final
 
+from datamodel_code_generator.enums import _pydantic_version_key
+from datamodel_code_generator.model.pydantic_v2.version import PYDANTIC_V2_MISSING_MINIMUM
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
 
@@ -21,6 +24,8 @@ MODEL_DEPENDENCIES: Final = (
     ("ulid", "python-ulid>=3.2.1"),
     ("pendulum", "pendulum>=3.2"),
 )
+PYDANTIC_FLOOR: Final = "2.13.5"
+PYDANTIC_IMPORT_MINIMUMS: Final = (("pydantic.MISSING", PYDANTIC_V2_MISSING_MINIMUM),)
 _PLAN_DEFAULTS: Final[dict[str, object]] = {
     "style": None,
     "explode": False,
@@ -111,3 +116,9 @@ def model_dependencies(imported: frozenset[str]) -> tuple[str, ...]:
             if any(item == name or item.startswith(f"{name}.") for item in imported)
         )
     )
+
+
+def pydantic_dependency(imported: frozenset[str]) -> str:
+    """Return the pydantic requirement: the tested floor, raised to the newest minimum of what the models import."""
+    minimums = (minimum for name, minimum in PYDANTIC_IMPORT_MINIMUMS if name in imported)
+    return f"pydantic>={max((PYDANTIC_FLOOR, *minimums), key=_pydantic_version_key)}"

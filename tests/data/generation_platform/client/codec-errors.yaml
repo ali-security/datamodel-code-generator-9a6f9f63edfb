@@ -121,6 +121,19 @@ paths:
       responses:
         '204':
           description: Members whose values no text of one kind writes.
+  /inherited:
+    post:
+      operationId: submitInherited
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - {$ref: '#/components/schemas/Base'}
+                - {type: object, properties: {name: {type: string}}}
+      responses:
+        '204':
+          description: An inherited member whose values no text of one kind writes.
   /cycle:
     get:
       operationId: getCycle
@@ -133,6 +146,10 @@ paths:
           description: A parameter schema whose branches lead back to it.
 components:
   schemas:
+    Base:
+      type: object
+      properties:
+        loc: {type: object, properties: {x: {type: integer}}}
     Loop:
       anyOf: [{$ref: '#/components/schemas/Back'}]
     Back:

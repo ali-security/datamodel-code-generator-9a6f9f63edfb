@@ -61,7 +61,9 @@ method and argument names keep the number. An explicit name, a `name`, `paramete
 never renamed.
 
 Generation ends by printing to stderr the `uv add` command that adds the runtime dependencies of the package to your
-project. `--check` compares without writing and prints the differences as for models, and `--output-format json`
+project. With Pydantic models the minimum is `pydantic>=2.13.5`, and `pydantic>=2.14` when
+`--target-pydantic-version 2.14` with `--use-missing-sentinel` makes the models import `MISSING` from `pydantic`.
+`--check` compares without writing and prints the differences as for models, and `--output-format json`
 emits the model generation and check payloads, as with `--generate-server`. `--diff-against` and `--watch` also work
 as they do with `--generate-server`.
 
@@ -3381,6 +3383,16 @@ against the schema. A part header HTTPX2 refuses, and a part that is not a `Fiel
 name, raises a request `DecodeError` with the reason `unencodable` before sending. A body whose parts are all bytes is
 encoded once, with `Content-Length`; a body without parts is sent empty, without a Content-Type. HTTPX2 chooses the
 boundary.
+
+The type of a member decides its parts, in a `MultipartBody` and in a form-data body sent as its model alike. A
+member repeats, one part for each item, when its type is an array. A value whose type has one scalar kind is text: a
+string as it is, a number or a boolean as JSON writes it. A value whose type has none is one `application/json` part:
+an object, a mapping, a union of a string and an object, an enum of mixed kinds, or a union of an array and another
+type such as `string | string[]`, whose array is then one part rather than one for each item. A member without a
+type is written by its value: a string as it is, an object or an array as JSON. A media type that the member's
+`encoding` declares takes precedence. A multipart response is read by the same rule, and a part that names a JSON
+media type is read as JSON. The generated FastAPI server reads the declared members of form-data bodies by this rule
+too.
 
 A multipart response is read only when the operation declares one, with the standard library's MIME parser: a part's
 bytes are kept as they arrived unless it names a transfer encoding, and a broken body, or a part that is itself a

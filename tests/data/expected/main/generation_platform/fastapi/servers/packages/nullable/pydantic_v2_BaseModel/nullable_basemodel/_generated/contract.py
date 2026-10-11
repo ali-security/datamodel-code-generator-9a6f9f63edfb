@@ -24,6 +24,7 @@ OperationDependencies = TypedDict(
         'post_color': Sequence[params.Depends],
         'post_name': Sequence[params.Depends],
         'post_pet': Sequence[params.Depends],
+        'post_code': Sequence[params.Depends],
         'post_value': Sequence[params.Depends],
         'post_anything': Sequence[params.Depends],
         'post_item': Sequence[params.Depends],
@@ -99,6 +100,18 @@ class PostPet:
 
     BODY: Final = BodyAdapter(
         media=(BodyMedia(media_type='application/json', kind='json', adapter=TypeAdapter(nullable_basemodel_models.Pet | None)),),
+    )
+    RESPONSES: Final = OperationResponses(
+        responses={'204': Declared()},
+        primary=204,
+    )
+
+
+class PostCode:
+    """Plans of the post_code operation."""
+
+    BODY: Final = BodyAdapter(
+        media=(BodyMedia(media_type='application/json', kind='json', adapter=TypeAdapter(nullable_basemodel_models.FieldCodesPostRequest)),),
     )
     RESPONSES: Final = OperationResponses(
         responses={'204': Declared()},

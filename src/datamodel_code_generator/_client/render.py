@@ -1966,6 +1966,7 @@ class _Registry(_Typing):
             module.local("_runtime.client.multipart", "PartPlan"),
             (
                 ("", repr(plan.name)),
+                *((("", repr(plan.kind)),) if plan.kind == "json" else ()),
                 *((("repeated=", "True"),) if plan.repeated else ()),
                 *((("codec=", self.codec(module, part.use)),) if part.use is not None else ()),
                 *((("content_types=", _tuple(map(repr, plan.content_types))),) if plan.content_types else ()),
@@ -1987,8 +1988,10 @@ class _Registry(_Typing):
 
     @staticmethod
     def multipart_members(module: TargetModule, media: MediaSpec) -> list[tuple[str, str]]:
-        """Return the keywords of a form-data media type whose members its codec writes: their media and styles."""
+        """Return the keywords of a form-data media type whose members its codec writes: JSON, media, and styles."""
         entries: list[tuple[str, str]] = []
+        if media.parts:
+            entries.append(("parts=", _tuple(_part_plan(module, item) for item in media.parts)))
         if media.content_types:
             entries.append(("content_types=", _tuple(repr(pair) for pair in media.content_types)))
         if media.encoded:
