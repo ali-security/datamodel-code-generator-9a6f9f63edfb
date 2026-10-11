@@ -448,11 +448,9 @@ def _uses(declaration: WireDeclaration) -> tuple[TypeUseId, ...]:
 
 def _json_type(encoding: WireDeclaration) -> bool:
     """Return whether an encoding's contentType names one JSON media type, rather than several or a range."""
-    match content_types(encoding):
-        case (single,):
-            return "*" not in single.partition(";")[0] and media_kind(single) == "json"
-        case _:
-            return False
+    if (found := content_types(encoding)) is None or len(found) != 1:
+        return False
+    return "*" not in found[0].partition(";")[0] and media_kind(found[0]) == "json"
 
 
 def _json_members(media: MediaSpec) -> frozenset[str | None]:
