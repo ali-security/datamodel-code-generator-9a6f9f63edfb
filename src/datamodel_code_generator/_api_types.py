@@ -30,9 +30,7 @@ __all__ = [
 
 TargetKind: TypeAlias = Literal["fastapi", "client"]
 DiagnosticSeverity: TypeAlias = Literal["error", "warning", "info"]
-DiagnosticStage: TypeAlias = Literal[
-    "config", "input", "model", "binding", "target", "ownership", "format", "publication"
-]
+DiagnosticStage: TypeAlias = Literal["config", "input", "model", "binding", "target", "format", "publication"]
 ArtifactKind: TypeAlias = Literal["model", "model_metadata", "remote_lock", "target"]
 ArtifactAction: TypeAlias = Literal["write", "unchanged"]
 
