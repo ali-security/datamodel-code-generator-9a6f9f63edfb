@@ -140,47 +140,63 @@
   key wire=(b'a\tb',)
   key sync h1 value='a \t b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a \t b',)
-  key sync h1 value='clé' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'cl\xc3\xa9',)
-  key sync h1 value='\xa0key\xa0' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xc2\xa0key\xc2\xa0',)
-  key sync h1 value='\ud7ffkey\ue000' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xed\x9f\xbfkey\xee\x80\x80',)
+  key sync h1 value='clé' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h1 value='\xa0key\xa0' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h1 value='\ud7ffkey\ue000' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h1 value='key\x7f' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h1 value='a\r\nb' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
   key async h1 value='a b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a b',)
   key async h1 value='a\tb' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a\tb',)
   key async h1 value='a \t b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a \t b',)
-  key async h1 value='clé' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'cl\xc3\xa9',)
-  key async h1 value='\xa0key\xa0' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xc2\xa0key\xc2\xa0',)
-  key async h1 value='\ud7ffkey\ue000' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xed\x9f\xbfkey\xee\x80\x80',)
-  key h1 arrivals=12 alpn=[]
+  key async h1 value='clé' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h1 value='\xa0key\xa0' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h1 value='\ud7ffkey\ue000' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h1 value='key\x7f' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h1 value='a\r\nb' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key h1 arrivals=6 alpn=[]
   key sync h2 value='a b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a b',)
   key sync h2 value='a\tb' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a\tb',)
   key sync h2 value='a \t b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a \t b',)
-  key sync h2 value='clé' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'cl\xc3\xa9',)
-  key sync h2 value='\xa0key\xa0' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xc2\xa0key\xc2\xa0',)
-  key sync h2 value='\ud7ffkey\ue000' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xed\x9f\xbfkey\xee\x80\x80',)
+  key sync h2 value='clé' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h2 value='\xa0key\xa0' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h2 value='\ud7ffkey\ue000' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h2 value='key\x7f' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key sync h2 value='a\r\nb' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
   key async h2 value='a b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a b',)
   key async h2 value='a\tb' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a\tb',)
   key async h2 value='a \t b' = FieldKeyedPostResponse(root='ready')
   key wire=(b'a \t b',)
-  key async h2 value='clé' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'cl\xc3\xa9',)
-  key async h2 value='\xa0key\xa0' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xc2\xa0key\xc2\xa0',)
-  key async h2 value='\ud7ffkey\ue000' = FieldKeyedPostResponse(root='ready')
-  key wire=(b'\xed\x9f\xbfkey\xee\x80\x80',)
-  key h2 arrivals=12 alpn=['h2', 'h2']
+  key async h2 value='clé' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h2 value='\xa0key\xa0' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h2 value='\ud7ffkey\ue000' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h2 value='key\x7f' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key async h2 value='a\r\nb' ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='idempotency_key') [field_path=('idempotency_key',)] invalid_value
+  key wire=None
+  key h2 arrivals=6 alpn=['h2', 'h2']

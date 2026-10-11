@@ -349,7 +349,7 @@ refusals
   resume bound values of another count ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='state') [field_path=('state',)] invalid_value
   resume an extra member ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='state') [field_path=('state',)] invalid_value
   resume an expiry of another form ! ConfigurationError: ConfigurationError(reason='invalid_value', field_path='state') [field_path=('state',)] invalid_value
-  resume cursor the reopen cannot encode ! DecodeError: DecodeError(operation_id='streamEvents', reason='unencodable', location='header.Last-Event-ID') [operation_id='streamEvents', location=('header', 'Last-Event-ID'), body_bytes=b'', truncated=False, cause=ParameterEncodingError('A header value contains control characters, surrounding whitespace, or a list delimiter')] unencodable
+  resume cursor the reopen cannot encode ! DecodeError: DecodeError(operation_id='streamEvents', reason='unencodable', location='header.Last-Event-ID') [operation_id='streamEvents', location=('header', 'Last-Event-ID'), body_bytes=b'', truncated=False, cause=ParameterEncodingError('A header value contains control characters, non-ASCII text, surrounding whitespace, or a list delimiter')] unencodable
   object cursor ! DecodeError: DecodeError(operation_id='streamRecords', reason='unencodable', location='query.after') [operation_id='streamRecords', location=('query', 'after'), body_bytes=b'', truncated=False, cause=ParameterEncodingError('The dict value does not have the string lexical kind')] unencodable
   > GET https://api.example.com/events last-event-id=None
   < closed

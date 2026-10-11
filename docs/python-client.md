@@ -2883,6 +2883,16 @@ unknown keys and leaves out absent ones; a dataclass drops unknown keys and leav
   whose encoded text is non-empty, with a `ParameterEncodingError` cause, before anything is sent: URL normalization in
   clients, proxies, and servers would remove the segment and send the call to another resource, and encoding the dots
   does not prevent it. `...` and `.a` are sent as they are, and a dot segment the path template spells is not refused.
+- **Header values.** A header carries HTAB, SP, and visible ASCII only, the text every HTTP client and server reads
+  alike: RFC 9110 leaves any other byte opaque, and servers read it as Latin-1 or as UTF-8. A header parameter of any
+  style, or of text content, whose value, array item, or object member holds other text, such as `café`, a control
+  character, or whitespace at either end, fails with a request `DecodeError` of the reason `unencodable`, with a
+  `ParameterEncodingError` cause, before anything is sent, instead of arriving as other text. A header parameter of
+  JSON content is written with its non-ASCII text escaped, so it carries any text; declare the header that way, or
+  apply an encoding the API defines yourself, such as percent-encoding, Base64, or RFC 8187, and decode it in the
+  service. The headers of `default_headers` and `extra_headers` and an `idempotency_key` follow the same rule; see
+  [timeouts and cancellation](#timeouts-and-cancellation). A response header's text is what HTTPX2 decodes: ASCII,
+  else UTF-8 when every header of the response is UTF-8, else Latin-1, which is how the generated server writes it.
 - **Cookies.** A cookie parameter with a single value is sent as it is, without percent-encoding, which is how HTTP
   clients send cookies and how the generated server reads them. A cookie cannot carry `;`, `,`, `"`, `\`,
   whitespace, control characters, or non-ASCII text (RFC 6265), so such a value fails with a request `DecodeError`
@@ -2932,6 +2942,9 @@ each name they list their value over the generated headers and query, the client
 parameters', and the call's extra ones last; None removes that name. Header names compare case-insensitively, query
 names exactly. A body's media type ranks above every layer but the call's `extra_headers`: only a call's Content-Type
 relabels its body, or with None sends it unlabelled, and a multipart one without `boundary=` keeps the body's boundary.
+A header's name is an HTTP token and its value HTAB, SP, and visible ASCII, or None: for any other, such as a value
+with a line break or `café`, `Client(...)`, `with_options(...)`, and `RequestOptions(...)` raise `ConfigurationError`
+with the reason `invalid_value` and the `field_path` `("headers", name)`, so nothing is sent.
 
 | Setting | Effective default | Meaning |
 |---|---|---|
@@ -3295,7 +3308,10 @@ before sending with `ConfigurationError` and the reason `not_declared`. A header
 `extra_headers` or the client's or a view's `default_headers` is sent as it is and is the call's key instead, the same
 on every call it reaches; a protocol helper, which needs a key per request, refuses it. The same key is sent unchanged on every eligible
 retry. A declaration without an active key does not authorize unsafe retries. The contract does not guarantee
-exactly-once business execution. HTTPX2 refuses a key that is not a valid header value when it sends the request.
+exactly-once business execution. A key is HTAB, SP, and visible ASCII: for any other text, such as `clé` or a line
+break, `RequestOptions(idempotency_key=...)` raises `ConfigurationError` with the reason `invalid_value` and the
+`field_path` `("idempotency_key",)`. HTTPX2 refuses a key that is still not a valid header value, such as one ending in
+a space, when it sends the request.
 
 ```python
 from pets import Client

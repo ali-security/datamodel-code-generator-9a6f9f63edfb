@@ -89,7 +89,19 @@ def test_fastapi_server(case: str, tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
 @pytest.mark.parametrize(
     "case",
-    ["pets", "parameters", "styles", "security", "bodies", "results", "nullable", "pagination", "streams", "ndjson"],
+    [
+        "pets",
+        "parameters",
+        "styles",
+        "headers",
+        "security",
+        "bodies",
+        "results",
+        "nullable",
+        "pagination",
+        "streams",
+        "ndjson",
+    ],
 )
 def test_generated_client(case: str, tmp_path: Path) -> None:
     """Generate a server and a client from one document, then call every operation of the server through the client."""

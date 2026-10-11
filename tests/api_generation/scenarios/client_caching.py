@@ -374,6 +374,10 @@ def _revalidated(cache: Caching, api: Any, exchange: Exchange, lines: list[str])
     fetched(lines, "aged stored", lambda: helper.fetch(userId=aged))
     fetched(lines, "aged revalidated by a 304 without Age", lambda: helper.fetch(userId=aged))
     fetched(lines, "fresh after the 304", lambda: helper.fetch(userId=aged))
+    named, tag = cache.user_id(26), {"etag": '"caf\u00e9"'.encode()}
+    exchange.respond(user(26, **tag, **{"cache-control": "max-age=0"}), not_modified(**tag))
+    fetched(lines, "validator beyond ASCII stored", lambda: helper.fetch(userId=named))
+    fetched(lines, "validator beyond ASCII sent in UTF-8, as it was read", lambda: helper.fetch(userId=named))
 
 
 def _vary(cache: Caching, api: Any, exchange: Exchange, lines: list[str]) -> None:

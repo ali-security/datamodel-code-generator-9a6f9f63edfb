@@ -31,6 +31,17 @@ if TYPE_CHECKING:
 _RAW: Final = "https://raw.example.com/items"
 _BOUNDARY: Final = re.compile(r"\b[0-9a-f]{32}\b")
 _PART: Final = '--b\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'
+_NON_ASCII: Final = {"X-A": "caf\u00e9"}
+_REFUSED_NAMES: Final = (("with a space", "X A"), ("not ASCII", "X-\u00c4"), ("on two lines", "X-A\r\nX-B"), ("int", 1))
+_REFUSED_TEXTS: Final = (
+    ("non-ASCII", "caf\u00e9"),
+    ("DEL", "\x7f"),
+    ("first code point past ASCII", "\x80"),
+    ("no-break space", "\xa0x"),
+    ("lone surrogate", "x\ud800"),
+    ("on two lines", "a\r\nX-Injected: 1"),
+    ("NUL", "a\x00b"),
+)
 
 
 def _modules(package: ModuleType) -> tuple[ModuleType, ModuleType, ModuleType]:
@@ -52,9 +63,10 @@ def headers(package: ModuleType, lines: list[str]) -> None:
         with package.Client(http_client=http, default_headers={"Content-Type": "application/json"}) as labeled:
             _parts(labeled, api, exchange, lines, options, bodies)
     http.close()
+    _texts(package, lines, options)
     _unsendable(package, lines, options)
     run(lambda: _async_headers(package, lines))
-    lines[:] = [_BOUNDARY.sub("<boundary>", line) for line in lines]
+    lines[:] = [_BOUNDARY.sub("<boundary>", line).replace("\t", "<HTAB>") for line in lines]
 
 
 def _layers(api: Any, exchange: Exchange, lines: list[str], options: ModuleType, package: ModuleType) -> None:
@@ -189,14 +201,40 @@ def _parts(
         )
 
 
+def _texts(package: ModuleType, lines: list[str], options: ModuleType) -> None:
+    """Send HTAB, SP, and visible ASCII in a parameter's and a layer's header, and refuse any other text unsent.
+
+    A layer's header also needs a token as its name; None removes a name and the empty string is a value.
+    """
+    exchange = Exchange(lines)
+    pets = json_response(200, [])
+    with exchange.client() as http, package.Client(http_client=http) as api:
+        exchange.respond(pets, pets)
+        record(lines, "parameter text", lambda: api.pets.list_pets(X_Trace="a\tb ~"))
+        sent = options.RequestOptions(extra_headers={"X-A": "a\tb ~", "X-Empty": ""})
+        record(lines, "call header text", lambda: api.pets.list_pets(X_Trace="t", options=sent))
+        for label, value in _REFUSED_TEXTS:
+            record(lines, f"parameter {label}", lambda value=value: api.pets.list_pets(X_Trace=value))
+            record(
+                lines, f"call header {label}", lambda value=value: options.RequestOptions(extra_headers={"X-A": value})
+            )
+        for label, name in _REFUSED_NAMES:
+            record(
+                lines, f"call header name {label}", lambda name=name: options.RequestOptions(extra_headers={name: "a"})
+            )
+        record(lines, "call header value int", lambda: options.RequestOptions(extra_headers={"X-A": 1}))
+        record(lines, "client header non-ASCII", lambda: package.Client(http_client=http, default_headers=_NON_ASCII))
+        record(lines, "view header non-ASCII", lambda: api.with_options(default_headers=_NON_ASCII))
+
+
 def _unsendable(package: ModuleType, lines: list[str], options: ModuleType) -> None:
     """Fail natively when HTTPX2 cannot send a header value, without waiting to retry the call."""
     pet = argument(package, "getPet", "path", "petId", 3)
     exchange, waits = Exchange(lines), []
-    split = options.RequestOptions(extra_headers={"X-A": "a\r\nb"})
+    padded = options.RequestOptions(extra_headers={"X-A": "a "})
     with exchange.client() as http, package.Client(http_client=http, clock=options.Clock(sleep=waits.append)) as api:
-        record(lines, "header value on two lines", lambda: api.pets.get_pet(petId=pet, options=split))
-    lines.append(f"  header value on two lines retry waits {waits}")
+        record(lines, "header value ending in a space", lambda: api.pets.get_pet(petId=pet, options=padded))
+    lines.append(f"  header value ending in a space retry waits {waits}")
 
 
 async def _async_headers(package: ModuleType, lines: list[str]) -> None:

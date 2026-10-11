@@ -113,6 +113,12 @@ message
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, if-none-match: "g"] b''
   aged revalidated by a 304 without Age = revalidated 25:cat status=200 network=304 attempts=1 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('content-type', 'application/json'), ('etag', '"g"'), ('Content-Length', '22')]
   fresh after the 304 = fresh_cache 25:cat status=200 network=None attempts=0 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('content-type', 'application/json'), ('etag', '"g"'), ('Content-Length', '22')]
+  > GET https://api.example.com/users/26
+    [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json] b''
+  validator beyond ASCII stored = network 26:cat status=200 network=200 attempts=1 type=application/json request_id=None headers=[('etag', '"café"'), ('cache-control', 'max-age=0'), ('content-length', '22'), ('content-type', 'application/json')]
+  > GET https://api.example.com/users/26
+    [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, if-none-match: "café"] b''
+  validator beyond ASCII sent in UTF-8, as it was read = revalidated 26:cat status=200 network=304 attempts=1 type=application/json request_id=None headers=[('cache-control', 'max-age=0'), ('content-type', 'application/json'), ('etag', '"café"'), ('Content-Length', '22')]
   > GET https://api.example.com/users/9
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, accept-language: en] b''
   english stored = network 9:english status=200 network=200 attempts=1 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('vary', 'Accept-Language, accept-language'), ('content-length', '25'), ('content-type', 'application/json')]

@@ -18,7 +18,7 @@ from typing_extensions import TypeVar
 
 from ..client.errors import ConfigurationError, SDKError, add_secondary
 from ..client.media import normalized
-from ..client.native import request_fields, wire_fields
+from ..client.native import request_fields
 from ..client.options import RequestOptions
 from ..client.responses import HeadersView, Response, ResponseInfo
 from ..client.retry import http_timestamp
@@ -337,7 +337,10 @@ class _Fetch(Generic[T]):
         )
 
     def conditional(self, entry: CacheEntry | None) -> httpx2.Request:
-        """Return the request to send, adding the validator of a usable stale entry the caller did not give."""
+        """Return the request to send, adding the validator of a usable stale entry the caller did not give.
+
+        The validator is a server's text, not a caller's, so one that is not ASCII is sent in UTF-8, as it was read.
+        """
         request = self.request
         self.requested_at = self.clock.time()
         validator = None if entry is None else _validator(self.plan, entry.headers)
@@ -346,7 +349,7 @@ class _Fetch(Generic[T]):
         self.sending = httpx2.Request(
             request.method,
             request.url,
-            headers=wire_fields((*request_fields(request), validator)),
+            headers=[*request.headers.raw, (validator[0].encode("ascii"), validator[1].encode())],
             content=request.content,
             extensions=dict(request.extensions),
         )

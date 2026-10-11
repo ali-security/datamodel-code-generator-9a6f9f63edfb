@@ -1,0 +1,8 @@
+models shared True
+# headers in-process sync
+# headers in-process async, socket sync, socket async
+get_text
+  > GET /text
+  get_text()
+  < 204 -
+  = (FieldTextGetResponse204XNameHeader(root='café'), FieldTextGetResponse204XTagsHeader(root=['café', 'b']), ('café',), ('café,b',))

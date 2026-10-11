@@ -15,7 +15,7 @@ from .errors import ConfigurationError
 from .timing import SYSTEM_CLOCK, Clock, ResolvedTimeoutOptions, checked_count, seconds
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncGenerator, Generator
+    from collections.abc import AsyncGenerator, Generator, Iterable
 
     import httpx2
 
@@ -199,6 +199,24 @@ def _frozen(value: Mapping[str, str | None] | None) -> Mapping[str, str | None] 
     return None if value is None else MappingProxyType(dict(value))
 
 
+def _sendable(headers: Iterable[tuple[object, object]], key: object) -> None:
+    """Refuse a header name that is not a token, and a header value or an idempotency key that is not ASCII text.
+
+    Such text is HTAB, SP, and visible ASCII, the only header octets every recipient reads alike.
+    """
+    from ..model_codecs.parameters import NOT_HEADER_TEXT, TOKEN  # noqa: PLC0415 - Only headers load their rules.
+
+    if isinstance(key, str) and NOT_HEADER_TEXT.search(key):
+        raise ConfigurationError(field_path=("idempotency_key",), reason="invalid_value")
+    for name, value in headers:
+        if not isinstance(name, str):
+            raise ConfigurationError(field_path=("headers",), reason="invalid_value")
+        if not TOKEN.fullmatch(name) or not (
+            value is None or (isinstance(value, str) and not NOT_HEADER_TEXT.search(value))
+        ):
+            raise ConfigurationError(field_path=("headers", name), reason="invalid_value")
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RequestOptions:
     """Settings of one call; each field left None, or UNSET where None removes, inherits the client's or view's.
@@ -220,7 +238,10 @@ class RequestOptions:
     auth: NativeAuth | UNSET | None = field(default=UNSET, repr=False)
 
     def __post_init__(self) -> None:
-        """Refuse a server beside a base URL, a negative retry count, and negative or nonfinite durations or phases."""
+        """Refuse a server beside a base URL, a negative retry count, and negative or nonfinite durations or phases.
+
+        An extra header needs a token as its name, and its value and an idempotency key HTAB, SP, and visible ASCII.
+        """
         if self.base_url is not None and self.server is not None:
             raise ConfigurationError(field_path=("base_url",), reason="conflicts_with_server")
         if self.max_retries is not None:
@@ -233,7 +254,10 @@ class RequestOptions:
                     seconds(value, ("timeout", phase))
         if (total := self.total_timeout) is not None and total is not UNSET:
             object.__setattr__(self, "total_timeout", seconds(total, ("total_timeout",)))
-        object.__setattr__(self, "extra_headers", _frozen(self.extra_headers))
+        headers = _frozen(self.extra_headers)
+        if headers is not None or isinstance(self.idempotency_key, str):
+            _sendable(() if headers is None else headers.items(), self.idempotency_key)
+        object.__setattr__(self, "extra_headers", headers)
         object.__setattr__(self, "extra_query", _frozen(self.extra_query))
 
 
