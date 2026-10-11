@@ -142,6 +142,29 @@ paths:
               tags: {contentType: application/json}
       responses:
         "204": {description: Done.}
+  /choices:
+    post:
+      operationId: postChoices
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/Choices"}
+      responses:
+        "204": {description: Done.}
+  /choice-files:
+    post:
+      operationId: postChoiceFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - {$ref: "#/components/schemas/Choices"}
+                - {type: object, properties: {file: {type: string, format: binary}}}
+      responses:
+        "204": {description: Done.}
   /checks:
     post:
       operationId: postCheck
@@ -196,3 +219,10 @@ components:
       properties:
         color: {type: string}
         minAge: {type: integer, minimum: 0}
+    Choices:
+      type: object
+      properties:
+        either: {anyOf: [{$ref: "#/components/schemas/Filter"}, {type: string}]}
+        level: {enum: [1, a, true]}
+        words: {anyOf: [{type: array, items: {type: string}}, {type: string}]}
+        lists: {anyOf: [{type: array, items: {type: integer}}, {type: array, items: {type: string}}]}

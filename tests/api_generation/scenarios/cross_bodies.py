@@ -1,11 +1,13 @@
 """Call the bodies server through its client: JSON, forms, multipart files and JSON parts, text, and bytes.
 
 Each call names the media type it sends where the operation declares several, and the server reports the model or
-value its handler received with the media type it read.
+value its handler received with the media type it read. Members whose types have no one scalar kind travel as JSON
+parts, in a body sent whole and in one sent part by part.
 """
 
 from __future__ import annotations
 
+from itertools import starmap
 from typing import TYPE_CHECKING
 
 from tests.api_generation.support.cross_targets import service
@@ -43,6 +45,13 @@ def calls(kit: Kit) -> Calls:
     refused = models.FieldSearchesPostRequest.model_construct(
         filter=models.Filter.model_construct(minAge=-1),
         filters=[models.Filter(), models.Filter.model_construct(minAge=-2)],
+    )
+    choices = (
+        ("text", {"either": "plain", "level": models.Level("a"), "words": "s", "lists": ["x"]}),
+        (
+            "values",
+            {"either": models.Filter(color="c"), "level": models.Level(1), "words": ["a", "b"], "lists": [1, 2]},
+        ),
     )
     return [
         ("post_item", lambda: api.post_item(body=models.Item(name="a"))),
@@ -97,6 +106,19 @@ def calls(kit: Kit) -> Calls:
         ("upload", lambda: api.upload(body=upload)),
         ("search", lambda: api.search(body=search)),
         ("search refused parts", lambda: api.search(body=refused)),
+        *(
+            (f"post_choices {label}", lambda choice=choice: api.post_choices(body=models.Choices(**choice)))
+            for label, choice in choices
+        ),
+        *(
+            (
+                f"post_choice_files {label}",
+                lambda choice=choice: api.post_choice_files(
+                    body=multipart(tuple(starmap(bodies.FieldPart, choice.items())))
+                ),
+            )
+            for label, choice in choices
+        ),
         ("post_check", lambda: api.post_check(body=models.Check(code=7, scores=[1, 2]))),
         ("post_note null", lambda: api.post_note(body=models.FieldNotesPostRequest(None))),
         ("post_note item", lambda: api.post_note(body=models.FieldNotesPostRequest(models.Item(name="i")))),

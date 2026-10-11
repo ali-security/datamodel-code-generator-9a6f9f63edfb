@@ -639,3 +639,60 @@ def split_parts(package: ModuleType, lines: list[str]) -> None:
         exchange.respond(raw_response(200, _form(*_SPLIT_PARTS), "multipart/form-data; boundary=b1"))
         record(lines, "split parts read", lambda: [(part.name, part.value) for part in api.default.read_upload().parts])
     lines[:] = [_BOUNDARY.sub("<boundary>", line) for line in lines]
+
+
+_KINDS: Final = (
+    ("text", {"either": "plain", "level": "a", "words": "s", "lists": ["x"], "tags": ["t", "u"], "count": 3}),
+    (
+        "values",
+        {"either": {"color": "c"}, "level": 1, "words": ["a", "b"], "lists": [1, 2], "filters": [{"color": "f"}, {}]},
+    ),
+)
+_KIND_PARTS: Final = (
+    (_NAMED % b"either" + _JSON, b'{"color":"c"}'),
+    (_NAMED % b"level", b'"a"'),
+    (_NAMED % b"words", b'["a","b"]'),
+    (_NAMED % b"lists" + _JSON, b"[1,2]"),
+    (_NAMED % b"filters" + _JSON, b'{"color":"f"}'),
+    (_NAMED % b"filters" + _JSON, b"{}"),
+    (_NAMED % b"tags", b"t"),
+    (_NAMED % b"tags", b"u"),
+    (_NAMED % b"count", b"3"),
+)
+
+
+def kinded_parts(package: ModuleType, lines: list[str]) -> None:
+    """Send and read form-data members by the kind of their types, in a body sent whole and in one sent as parts.
+
+    A member whose type has no one scalar kind is one JSON part, or one for each item when its type is a list.
+    """
+    bodies = importlib.import_module(f"{package.__name__}.bodies")
+    exchange = Exchange(lines)
+    with exchange.client() as http, package.Client(http_client=http) as api:
+        for label, value in _KINDS:
+            exchange.respond(raw_response(204))
+            whole = request_body(package, "sendChoices", None, value)
+            record(lines, f"{label} sent whole", lambda whole=whole: api.default.send_choices(body=whole))
+            exchange.respond(raw_response(204))
+            parts = bodies.MultipartBody(
+                tuple(
+                    bodies.FieldPart(name, form_part(package, "sendChoiceFiles", name, item))
+                    for name, item in value.items()
+                )
+            )
+            record(lines, f"{label} sent as parts", lambda parts=parts: api.default.send_choice_files(body=parts))
+        exchange.respond(raw_response(200, _form(*_KIND_PARTS), "multipart/form-data; boundary=b1"))
+        record(lines, "kinds read whole", api.default.read_choices)
+        exchange.respond(
+            raw_response(
+                200,
+                _form(*_KIND_PARTS, (_NAMED % b"file" + b'; filename="f"', b"\x00")),
+                "multipart/form-data; boundary=b1",
+            )
+        )
+        record(
+            lines,
+            "kinds read as parts",
+            lambda: [(part.name, part.value) for part in api.default.read_choice_files().parts],
+        )
+    lines[:] = [_BOUNDARY.sub("<boundary>", line) for line in lines]
