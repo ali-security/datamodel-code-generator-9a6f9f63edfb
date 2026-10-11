@@ -94,6 +94,7 @@ def test_fastapi_server(case: str, tmp_path: Path, monkeypatch: pytest.MonkeyPat
         "pets",
         "parameters",
         "styles",
+        "headers",
         "security",
         "bodies",
         "variants",

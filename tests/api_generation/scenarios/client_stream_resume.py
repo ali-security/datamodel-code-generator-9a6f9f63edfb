@@ -578,6 +578,10 @@ def _unencodable(resumes: _Resumes, api: Any) -> None:
     stream = api.protocols.events.live.open(stream_options=resumes.reconnect)
     _refused(lines, "event ID ending in a space", stream)
     record(lines, "checkpoint", stream.checkpoint)
+    resumes.reply('id: caf\u00e9\ndata: {"text": "a"}\n\n'.encode(), harness.interrupted())
+    stream = api.protocols.events.live.open(stream_options=resumes.reconnect)
+    _refused(lines, "event ID beyond ASCII", stream)
+    record(lines, "checkpoint", stream.checkpoint)
     resumes.reply(b'event: other\ndata: {"id": {"a": 1}}\n\n', harness.interrupted())
     stream = api.protocols.topics.marks.open(stream_options=resumes.reconnect)
     _refused(lines, "object body cursor written to a query parameter", stream)
@@ -642,6 +646,7 @@ def _refusals(resumes: _Resumes, api: Any) -> None:
         ("an extra member", _replaced(state, arguments=[[], [], ["c"]])),
         ("an expiry of another form", _replaced(state, expires_at="soon")),
         ("cursor the reopen cannot encode", _replaced(state, cursor="5 ")),
+        ("cursor beyond ASCII", _replaced(state, cursor="caf\u00e9")),
     ):
         record(lines, f"resume {label}", lambda saved=saved: helper.resume(saved))
     record(

@@ -25,9 +25,9 @@ _STYLES: Final = {
     "header": frozenset({"simple"}),
     "cookie": frozenset({"form", "cookie"}),
 }
-_TOKEN: Final = re.compile(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+")
+TOKEN: Final = re.compile(r"[!#$%&'*+.^_`|~0-9A-Za-z-]+")
+_NOT_HEADER_TEXT: Final = re.compile(r"[^\t\x20-\x7E]")
 _COOKIE_OCTETS: Final = re.compile(r"[\x21\x23-\x2B\x2D-\x3A\x3C-\x5B\x5D-\x7E]*")
-_HEADER_CONTROL: Final = re.compile(r"[\x00-\x08\x0A-\x1F\x7F\ud800-\udfff]")
 _OWS: Final = " \t"
 
 
@@ -60,7 +60,7 @@ class ParameterPlan:
         if (
             self.location == "cookie"
             and (self.style == "cookie" or self.shape == "scalar")
-            and not _TOKEN.fullmatch(self.name)
+            and not TOKEN.fullmatch(self.name)
         ):
             msg = f"cookie parameter name {self.name!r} is not a token, which a cookie sent as it is needs"
             raise ValueError(msg)
@@ -192,9 +192,17 @@ def _encode_query(plan: ParameterPlan, entries: list[_Entry], *, raw: bool = Fal
             return [(name, _joined(encoded))]
 
 
+def header_text(text: str) -> bool:
+    """Return whether a text is a header value every recipient reads alike, as RFC 9110 writes one.
+
+    It holds HTAB, SP, and visible ASCII only, without whitespace at either end.
+    """
+    return not _NOT_HEADER_TEXT.search(text) and text == text.strip(_OWS)
+
+
 def _header_text(text: str, *, item: bool) -> str:
-    if _HEADER_CONTROL.search(text) or text != text.strip(_OWS) or (item and "," in text):
-        msg = "A header value contains control characters, surrounding whitespace, or a list delimiter"
+    if not header_text(text) or (item and "," in text):
+        msg = "A header value contains control characters, non-ASCII text, surrounding whitespace, or a list delimiter"
         raise ParameterEncodingError(msg)
     return text
 
@@ -215,7 +223,7 @@ def _encode_cookie(plan: ParameterPlan, entries: list[_Entry]) -> list[_Entry]:
     pairs = [(plan.name if key is None else key, text) for key, text in entries]
     if plan.style == "form" and plan.shape != "scalar":
         return [(quote(key, safe=""), quote(text, safe="")) for key, text in pairs]
-    if not all(_TOKEN.fullmatch(key) and _COOKIE_OCTETS.fullmatch(text) for key, text in pairs):
+    if not all(TOKEN.fullmatch(key) and _COOKIE_OCTETS.fullmatch(text) for key, text in pairs):
         msg = "A cookie name must be a token and its value unquoted cookie octets"
         raise ParameterEncodingError(msg)
     return list(pairs)
@@ -226,7 +234,9 @@ def _content(plan: ParameterPlan, value: JSONValue) -> str:
         case "json", _:
             finite(value)
             text = json_bytes(value).decode()
-            return text if plan.location != "header" or text.isascii() else json_bytes(value, ascii_only=True).decode()
+            if plan.location != "header":
+                return text
+            return (text if text.isascii() else json_bytes(value, ascii_only=True).decode()).replace("\x7f", "\\u007f")
         case "text", str():
             return value
         case _:
