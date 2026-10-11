@@ -4787,6 +4787,30 @@
       {
         "method": "POST",
         "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/vnd.text+json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "\ufeffnull",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
         "content": "null"
       },
       {
@@ -4891,6 +4915,23 @@
       {
         "method": "POST",
         "url": "/pets"
+      },
+      {
+        "method": "POST",
+        "url": "/codes",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/codes",
+        "json": "a"
+      },
+      {
+        "method": "POST",
+        "url": "/codes"
       },
       {
         "method": "POST",
@@ -5050,6 +5091,30 @@
         "content": "null",
         "headers": {
           "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/vnd.text+json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "\ufeffnull",
+        "headers": {
+          "Content-Type": "application/json"
         }
       },
       {
@@ -5291,6 +5356,299 @@
         "content": "null",
         "headers": {
           "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/vnd.text+json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "\ufeffnull",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null"
+      },
+      {
+        "method": "POST",
+        "url": "/lists",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/lists",
+        "json": [
+          1,
+          2
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/lists"
+      },
+      {
+        "method": "POST",
+        "url": "/choices",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/choices",
+        "json": {
+          "name": "a"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/choices",
+        "json": 3
+      },
+      {
+        "method": "POST",
+        "url": "/choices",
+        "json": "x"
+      },
+      {
+        "method": "POST",
+        "url": "/colors",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/colors",
+        "json": "red"
+      },
+      {
+        "method": "POST",
+        "url": "/colors"
+      },
+      {
+        "method": "POST",
+        "url": "/names",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/names",
+        "json": "a"
+      },
+      {
+        "method": "POST",
+        "url": "/names"
+      },
+      {
+        "method": "POST",
+        "url": "/values",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/values",
+        "json": {
+          "any": [
+            1,
+            null
+          ]
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/values"
+      },
+      {
+        "method": "POST",
+        "url": "/anything",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/anything",
+        "json": [
+          1,
+          "a"
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/anything"
+      },
+      {
+        "method": "POST",
+        "url": "/items",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/items",
+        "json": {
+          "name": "a"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/items"
+      },
+      {
+        "method": "POST",
+        "url": "/ids",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/ids",
+        "json": "00000000-0000-0000-0000-000000000001"
+      },
+      {
+        "method": "POST",
+        "url": "/drafts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/drafts",
+        "json": "a"
+      },
+      {
+        "method": "POST",
+        "url": "/drafts"
+      }
+    ],
+    "package_snapshots": []
+  },
+  "nullable-force-optional": {
+    "input": "server-nullable-3-0.yaml",
+    "services": "bodies",
+    "backends": [
+      "pydantic_v2.BaseModel",
+      "pydantic_v2.dataclass"
+    ],
+    "config": {
+      "server_handler_modes": {
+        "/paths/~1lists/post": "async"
+      }
+    },
+    "model": {
+      "force_optional_for_required_fields": true
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "json": "a"
+      },
+      {
+        "method": "POST",
+        "url": "/texts"
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "json": "too long"
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "json": 1
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "{",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "null",
+        "headers": {
+          "Content-Type": "application/vnd.text+json"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "",
+        "headers": {
+          "Content-Type": "text/plain"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/texts",
+        "content": "\ufeffnull",
+        "headers": {
+          "Content-Type": "application/json"
         }
       },
       {

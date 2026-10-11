@@ -417,6 +417,10 @@
     },
     "config": {}
   },
+  "multipart-kinds": {
+    "input": "multipart-kinds.yaml",
+    "config": {}
+  },
   "servers": {
     "input": "servers.yaml",
     "modules": [

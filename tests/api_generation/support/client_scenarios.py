@@ -33,7 +33,7 @@ from tests.api_generation.scenarios.client_fields import fields, optional_models
 from tests.api_generation.scenarios.client_headers import headers, native_boundaries
 from tests.api_generation.scenarios.client_hooks import hooks
 from tests.api_generation.scenarios.client_mock_transport import mock_transport
-from tests.api_generation.scenarios.client_multipart import multipart, split_parts
+from tests.api_generation.scenarios.client_multipart import kinded_parts, multipart, split_parts
 from tests.api_generation.scenarios.client_naming import (
     naming,
     naming_full_path,
@@ -880,6 +880,7 @@ SCENARIOS: Final[dict[str, tuple[str, tuple[str, ...], Callable[[ModuleType, lis
     "bodies": ("pets", ("pydantic_v2.BaseModel",), bodies),
     "multipart": ("media", ("pydantic_v2.BaseModel", "typing.TypedDict"), multipart),
     "multipart-split": ("multipart-split", STRUCTURAL, split_parts),
+    "multipart-kinds": ("multipart-kinds", ALL_BUT_MSGSPEC, kinded_parts),
     "headers": ("pets", ("pydantic_v2.BaseModel",), headers),
     "native-boundaries": ("native-boundaries", BACKENDS, native_boundaries),
     "nullable-parameters": ("nullable-parameters", ("pydantic_v2.BaseModel",), nullable_parameters),

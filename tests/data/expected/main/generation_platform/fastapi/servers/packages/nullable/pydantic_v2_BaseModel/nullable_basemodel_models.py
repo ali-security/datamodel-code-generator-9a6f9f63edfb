@@ -40,6 +40,10 @@ class FieldChoicesPostRequest(RootModel[Item | int | None]):
     root: Item | int | None
 
 
+class FieldCodesPostRequest(RootModel[str | None]):
+    root: str | None
+
+
 class FieldValuesPostRequest(RootModel[Any]):
     root: Any
 
