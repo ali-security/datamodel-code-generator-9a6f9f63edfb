@@ -22,6 +22,12 @@ service UntaggedService without its methods: TypeError
 < 415 application/json {"detail":"Unsupported media type"}
 > POST /texts
 < 415 application/json {"detail":"Unsupported media type"}
+> POST /texts
+< 415 application/json {"detail":"Unsupported media type"}
+> POST /texts
+< 422 application/json [{"type": "json_invalid", "loc": ["body"]}]
+> POST /texts
+< 415 application/json {"detail":"Unsupported media type"}
 > POST /lists
   post_list(body=FieldListsPostRequest(root=None))
 < 204 - b''
@@ -115,6 +121,12 @@ service UntaggedService without its methods: TypeError
 < 422 application/json [{"type": "json_invalid", "loc": ["body"]}]
 > POST /texts
 < 415 application/json {"detail":"Unsupported media type"}
+> POST /texts
+< 415 application/json {"detail":"Unsupported media type"}
+> POST /texts
+< 415 application/json {"detail":"Unsupported media type"}
+> POST /texts
+< 422 application/json [{"type": "json_invalid", "loc": ["body"]}]
 > POST /texts
 < 415 application/json {"detail":"Unsupported media type"}
 > POST /lists

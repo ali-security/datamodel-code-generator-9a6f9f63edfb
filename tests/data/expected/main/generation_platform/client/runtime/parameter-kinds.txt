@@ -80,13 +80,13 @@
   read fields of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='abc', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='7')
+  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='7')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='abc')
+  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text in an untyped member ! DecodeError: DecodeError(status_code=200, operation_id='saveValues', reason='invalid_syntax') [operation_id='saveValues', body_bytes=b'--b1\r\nContent-Disposition: form-data; name="mixed"\r\n\r\nabc\r\n--b1\r\nContent-Disposition: form-data; name="either"\r\n\r\nabc\r\n--b1--\r\n', truncated=False, cause=JSONDecodeError('Expecting value: line 1 column 1 (char 0)')] invalid_syntax
+  read parts of text alone = Values(amount=None, amounts=None, step=None, level=None, count=None, flag=None, mixed='abc', either='abc')
 # parameter-kinds pydantic_v2.dataclass, dataclasses.dataclass
   > GET https://api.example.com/values?amount=12345678901234567890.123
     [host: api.example.com, accept-encoding: gzip, deflate] b''
@@ -169,13 +169,13 @@
   read fields of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='abc', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='7')
+  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='7')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='abc')
+  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text in an untyped member ! DecodeError: DecodeError(status_code=200, operation_id='saveValues', reason='invalid_syntax') [operation_id='saveValues', body_bytes=b'--b1\r\nContent-Disposition: form-data; name="mixed"\r\n\r\nabc\r\n--b1\r\nContent-Disposition: form-data; name="either"\r\n\r\nabc\r\n--b1--\r\n', truncated=False, cause=JSONDecodeError('Expecting value: line 1 column 1 (char 0)')] invalid_syntax
+  read parts of text alone = Values(amount=None, amounts=None, step=None, level=None, count=None, flag=None, mixed='abc', either='abc')
 # parameter-kinds typing.TypedDict
   > GET https://api.example.com/values?amount=12345678901234567890.123
     [host: api.example.com, accept-encoding: gzip, deflate] b''
@@ -258,13 +258,13 @@
   read fields of text = {'amount': Decimal('12345678901234567890.123'), 'amounts': [Decimal('1.50'), Decimal('2')], 'step': 1.2345678901234567e+19, 'level': 2, 'count': 12, 'flag': True, 'mixed': 'abc', 'either': 'abc'}
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts = {'amount': Decimal('12345678901234567890.123'), 'amounts': [Decimal('1.50'), Decimal('2')], 'step': 1.2345678901234567e+19, 'level': 2, 'count': 12, 'flag': True, 'mixed': 5, 'either': '7'}
+  read parts = {'amount': Decimal('12345678901234567890.123'), 'amounts': [Decimal('1.50'), Decimal('2')], 'step': 1.2345678901234567e+19, 'level': 2, 'count': 12, 'flag': True, 'mixed': '5', 'either': '7'}
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text = {'amount': Decimal('12345678901234567890.123'), 'amounts': [Decimal('1.50'), Decimal('2')], 'step': 1.2345678901234567e+19, 'level': 2, 'count': 12, 'flag': True, 'mixed': 5, 'either': 'abc'}
+  read parts of text = {'amount': Decimal('12345678901234567890.123'), 'amounts': [Decimal('1.50'), Decimal('2')], 'step': 1.2345678901234567e+19, 'level': 2, 'count': 12, 'flag': True, 'mixed': '5', 'either': 'abc'}
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text in an untyped member ! DecodeError: DecodeError(status_code=200, operation_id='saveValues', reason='invalid_syntax') [operation_id='saveValues', body_bytes=b'--b1\r\nContent-Disposition: form-data; name="mixed"\r\n\r\nabc\r\n--b1\r\nContent-Disposition: form-data; name="either"\r\n\r\nabc\r\n--b1--\r\n', truncated=False, cause=JSONDecodeError('Expecting value: line 1 column 1 (char 0)')] invalid_syntax
+  read parts of text alone = {'mixed': 'abc', 'either': 'abc'}
 # parameter-kinds msgspec.Struct
   > GET https://api.example.com/values?amount=12345678901234567890.123
     [host: api.example.com, accept-encoding: gzip, deflate] b''
@@ -345,10 +345,10 @@
   read fields of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='abc', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='7')
+  read parts = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='7')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed=5, either='abc')
+  read parts of text = Values(amount=Decimal('12345678901234567890.123'), amounts=[Decimal('1.50'), Decimal('2')], step=1.2345678901234567e+19, level=<Level.integer_2: 2>, count=12, flag=True, mixed='5', either='abc')
   > POST https://api.example.com/values
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/x-www-form-urlencoded, multipart/form-data, content-type: application/x-www-form-urlencoded, content-length: 108] b'amount=12345678901234567890.123&amounts=1.50&amounts=2&step=0.25&level=2&count=12&flag=true&mixed=5&either=5'
-  read parts of text in an untyped member ! DecodeError: DecodeError(status_code=200, operation_id='saveValues', reason='invalid_syntax') [operation_id='saveValues', body_bytes=b'--b1\r\nContent-Disposition: form-data; name="mixed"\r\n\r\nabc\r\n--b1\r\nContent-Disposition: form-data; name="either"\r\n\r\nabc\r\n--b1--\r\n', truncated=False, cause=JSONDecodeError('Expecting value: line 1 column 1 (char 0)')] invalid_syntax
+  read parts of text alone = Values(amount=UNSET, amounts=UNSET, step=UNSET, level=UNSET, count=UNSET, flag=UNSET, mixed='abc', either='abc')

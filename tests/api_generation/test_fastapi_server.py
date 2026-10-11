@@ -53,6 +53,7 @@ PRESET = pytest.mark.skipif(sys.version_info < (3, 12), reason="the quick-start 
         "nullable",
         "nullable-3-0",
         "nullable-alias",
+        "nullable-force-optional",
         "results",
         "nullable-results",
         "nullable-results-3-0",
@@ -89,7 +90,19 @@ def test_fastapi_server(case: str, tmp_path: Path, monkeypatch: pytest.MonkeyPat
 
 @pytest.mark.parametrize(
     "case",
-    ["pets", "parameters", "styles", "security", "bodies", "results", "nullable", "pagination", "streams", "ndjson"],
+    [
+        "pets",
+        "parameters",
+        "styles",
+        "security",
+        "bodies",
+        "variants",
+        "results",
+        "nullable",
+        "pagination",
+        "streams",
+        "ndjson",
+    ],
 )
 def test_generated_client(case: str, tmp_path: Path) -> None:
     """Generate a server and a client from one document, then call every operation of the server through the client."""

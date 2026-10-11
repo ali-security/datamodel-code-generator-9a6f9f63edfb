@@ -72,6 +72,9 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         def post_pet(self, **arguments: object) -> None:
             record("post_pet", arguments)
 
+        def post_code(self, **arguments: object) -> None:
+            record("post_code", arguments)
+
         def post_value(self, **arguments: object) -> None:
             record("post_value", arguments)
 
@@ -89,6 +92,12 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
 
         def search(self, **arguments: object) -> None:
             record("search", arguments)
+
+        def post_choices(self, **arguments: object) -> None:
+            record("post_choices", arguments)
+
+        def post_choice_files(self, **arguments: object) -> None:
+            record("post_choice_files", arguments)
 
         async def post_raw(self, *, request: object) -> None:
             body = await request.body()

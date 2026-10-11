@@ -43,7 +43,7 @@ OPERATION_0: Final[OperationPlan[CreatePetResponse]] = OperationPlan(
     servers=_SERVERS_0,
     responses=ResponseDecoder((model_branch('201', 'application/json', 'json', model_bindings.codec_3),), ()),
     parameters=(ParameterSpec(plan=ParameterPlan(location='query', name='tag', style='form', explode=True), codec=model_bindings.codec_0),),
-    body=RequestBody(media=(BodyMedia(media_type='application/json', kind='json', codec=model_bindings.codec_1), BodyMedia(media_type='application/x-www-form-urlencoded', kind='form', codec=model_bindings.codec_2, additional=FieldPlan('', 'string'))), required=True),
+    body=RequestBody(media=(BodyMedia(media_type='application/json', kind='json', codec=model_bindings.codec_1), BodyMedia(media_type='application/x-www-form-urlencoded', kind='form', codec=model_bindings.codec_2, fields=(FieldPlan('name', 'string'), FieldPlan('tag', 'string')), additional=FieldPlan('', 'string'))), required=True),
     fields=FieldArguments(method='create_pet', names=('name', 'kind', 'pet_tag', 'birthDate', 'owner', 'secret'), media=(BodyFields(media_type='application/json', fields=((0, 'name', True), (1, 'kind', True), (2, 'tag', False), (3, 'birthDate', False), (4, 'owner', False), (5, 'secret', False))), BodyFields(media_type='application/x-www-form-urlencoded', fields=((0, 'name', True), (2, 'tag', False))))),
 )
 

@@ -42,6 +42,9 @@ FieldListsPostRequest = TypeAliasType("FieldListsPostRequest", list[int] | None)
 FieldChoicesPostRequest = TypeAliasType("FieldChoicesPostRequest", Item | int | None)
 
 
+FieldCodesPostRequest = TypeAliasType("FieldCodesPostRequest", str | None)
+
+
 FieldValuesPostRequest = TypeAliasType("FieldValuesPostRequest", Any)
 
 
