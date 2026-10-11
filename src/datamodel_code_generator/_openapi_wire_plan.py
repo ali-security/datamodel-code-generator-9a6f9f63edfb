@@ -701,10 +701,6 @@ class LexicalKinds:
         value = next((found for leaf in leaves if (found := self._reached(*leaf)) is not None), None)
         return _one_kind(set(self._leaves(value, frozenset())), mixed=True)
 
-    def of(self, value: TypeView, steps: tuple[LeafStep, ...] = ()) -> LexicalKind | None:
-        """Return the kind of the leaf the steps reach from a type, such as a model field's type."""
-        return _one_kind(set(self._leaves(self._stepped(value, steps), frozenset())), mixed=True)
-
     def member(self, value: TypeView) -> tuple[LexicalKind | None, TypeView, bool]:
         """Return how a form member of a type is written: the kind of its text, each value's type, and its repeats.
 
