@@ -10,6 +10,7 @@ import pytest
 from datamodel_code_generator import DataModelType
 from tests.api_generation.support.fastapi_typing import (
     fastapi_bodies_report,
+    fastapi_parameters_report,
     fastapi_typing_report,
     fastapi_update_report,
 )
@@ -38,6 +39,13 @@ def test_fastapi_typing_bodies(tmp_path: Path) -> None:
     if not os.environ.get(ENABLED):
         pytest.skip(f"{ENABLED} enables type checking generated packages")
     assert_output(fastapi_bodies_report(tmp_path), EXPECTED / "bodies.txt")
+
+
+def test_fastapi_typing_parameters(tmp_path: Path) -> None:
+    """Check the package of a server whose routes have renamed path parameters, with its copied route classes."""
+    if not os.environ.get(ENABLED):
+        pytest.skip(f"{ENABLED} enables type checking generated packages")
+    assert_output(fastapi_parameters_report(tmp_path), EXPECTED / "parameters.txt")
 
 
 def test_fastapi_typing_updates(tmp_path: Path) -> None:

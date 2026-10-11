@@ -561,7 +561,7 @@ does not appear in it. An application of your own that includes `build_router(..
 too, unless it calls `serve_source_openapi(app, prefix=..., metadata=...)`, imported from the generated package,
 with the prefix the router is included under and the description settings to replace.
 
-A path placeholder that is no Python identifier or is a keyword, that repeats, or whose name an argument of the
+A path placeholder that is no ASCII identifier or is a keyword, that repeats, or whose name an argument of the
 endpoint already takes, such as `{request}`, is registered under a name of the route's own, such as `{dcg_p0}` for
 `{item-id}`, because Starlette matches a placeholder by an identifier. FastAPI's document shows that name for the
 placeholder and its parameter, and so do `request.path_params`, `url_path_for`, and the route path in FastAPI's log

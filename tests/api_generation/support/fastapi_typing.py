@@ -57,6 +57,12 @@ def fastapi_bodies_report(root: Path) -> str:
     return "\n".join(checked(root, ["bodies"], "bodies")) + "\n"
 
 
+def fastapi_parameters_report(root: Path) -> str:
+    """Check the parameters package, whose routes with renamed path placeholders register `wire_named` route classes."""
+    _generate(root, SOURCE / "server-parameters.yaml", "parameters", DataModelType.PydanticV2BaseModel)
+    return "\n".join(checked(root, ["parameters"], "parameters")) + "\n"
+
+
 def fastapi_update_report(root: Path) -> str:
     """Check a user's service against the first document, then against the regenerated package of the second."""
     shutil.copyfile(SAMPLES / "updates_service.py", root / "updates_service.py")
