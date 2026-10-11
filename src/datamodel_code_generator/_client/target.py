@@ -55,7 +55,7 @@ from datamodel_code_generator._target_contract import (
 )
 from datamodel_code_generator._target_documents import canonical_bytes, sha256
 from datamodel_code_generator._target_module import TargetModule, TypeNames
-from datamodel_code_generator._target_render import model_dependencies
+from datamodel_code_generator._target_render import model_dependencies, pydantic_dependency
 from datamodel_code_generator.enums import DataModelType
 
 if TYPE_CHECKING:
@@ -81,12 +81,7 @@ if TYPE_CHECKING:
 
 HTTPX2: Final = "httpx2>=2.13.0"
 DEPENDENCIES: Final = ("typing-extensions>=4.16",)
-PYDANTIC: Final = "pydantic>=2.13.5"
-BACKEND_DEPENDENCIES: Final[dict[str, tuple[str, ...]]] = {
-    "pydantic_v2.BaseModel": (PYDANTIC,),
-    "pydantic_v2.dataclass": (PYDANTIC,),
-    "msgspec.Struct": ("msgspec>=0.21.1",),
-}
+MSGSPEC: Final = "msgspec>=0.21.1"
 _BACKENDS: Final[dict[DataModelType, CodecBackend]] = {
     DataModelType.PydanticV2BaseModel: "pydantic_v2.BaseModel",
     DataModelType.PydanticV2Dataclass: "pydantic_v2.dataclass",
@@ -176,7 +171,7 @@ class ClientTarget:
         dependencies = (
             WEBSOCKETS if sockets else HTTPX2,
             *DEPENDENCIES,
-            *BACKEND_DEPENDENCIES.get(backend, ()),
+            *_backend_dependencies(backend, request.model_imports),
             *webhook_dependencies(webhooks),
             *model_dependencies(request.model_imports),
         )
@@ -200,6 +195,12 @@ class ClientTarget:
             use_single_line_docstring=request.model_config.use_single_line_docstring,
         )
         return TargetRender(files=renderer.files(), dependencies=dependencies)
+
+
+def _backend_dependencies(backend: CodecBackend, model_imports: frozenset[str]) -> tuple[str, ...]:
+    if backend in {"pydantic_v2.BaseModel", "pydantic_v2.dataclass"}:
+        return (pydantic_dependency(model_imports),)
+    return (MSGSPEC,) if backend == "msgspec.Struct" else ()
 
 
 def _wire(request: TargetRequest, batch: GeneratedTypeContractBatch) -> WirePlan:

@@ -66,6 +66,7 @@ _TEXT: Final = "A text part carries a scalar"
 _DISPOSITION: Final = "A part's Content-Disposition comes from its name and filename, so its headers may not name it"
 _CLAIMED: Final = "Two form-data members write parts of the same name"
 _OCTETS: Final = "application/octet-stream"
+_JSON: Final = "application/json"
 _FORM_DATA: Final = "multipart/form-data"
 
 
@@ -203,7 +204,8 @@ class PartPlan:
     """How one form-data member is sent or read: its kind, repeats, codec, media types, and style.
 
     A received part is read in its lexical kind, or as JSON. A sent value is encoded by the codec, when the member
-    has one, and each item of a repeated member becomes its own part. The media types of the member's encoding bound
+    has one, and each item of a repeated member becomes its own part: JSON for a member of the JSON kind, whose type
+    has no one scalar kind, and for any other by the value's shape. The media types of the member's encoding bound
     the media type a part names, and the first concrete one is its default. A member whose encoding gives a query
     style writes a part for each name and value that style gives its value.
     """
@@ -346,17 +348,24 @@ def _encoded(entries: list[Entry], media_type: str | None) -> tuple[bytes | Form
     return FormParts(tuple(entries), sent), sent
 
 
+def _shaped(plan: PartPlan | None) -> str | None:
+    """Return the media type a member's plan gives each value: JSON for the JSON kind, else the value's shape's."""
+    return _JSON if plan is not None and plan.kind == "json" else None
+
+
 def encode_multipart(
     value: JSONValue,
     content_types: Mapping[str, str] | None = None,
     styled: Mapping[str, ParameterPlan] | None = None,
     sent: str | None = None,
+    plans: Mapping[str, PartPlan] | None = None,
 ) -> tuple[bytes | FormParts, str | None]:
     """Encode an object as ordered form-data parts, repeating a part for each array member; an empty one writes none.
 
     The body is sent in the media type `sent` names. A member with an encoding's media type is written in it. A member
     in `styled` writes a part for each name and value its query style gives, without percent-encoding, and no two
-    members may then write parts of the same name.
+    members may then write parts of the same name. A member in `plans` is written as its plan says: a part for each
+    item only when it repeats, as JSON when it is of the JSON kind.
     """
     if not isinstance(value, Mapping):
         msg = "A multipart form value must be an object"
@@ -373,8 +382,9 @@ def encode_multipart(
         if styled and owners.setdefault(name, name) != name:
             raise ParameterEncodingError(_CLAIMED)
         declared = None if content_types is None else content_types.get(name)
-        for member in item if isinstance(item, list) else (item,):
-            content, media_type = multipart_member(member, declared)
+        plan = plans.get(name) if plans else None
+        for member in item if isinstance(item, list) and (plan is None or plan.repeated) else (item,):
+            content, media_type = multipart_member(member, declared or _shaped(plan))
             entries.append(_entry(name, content, media_type))
     return _encoded(entries, sent)
 
@@ -418,7 +428,7 @@ def _member(part: FieldPart[object], item: JSONValue, plan: PartPlan) -> Entry:
     if plan.content_types:
         content, media_type = multipart_member(item, plan.media(part.content_type))
     else:
-        content, shaped = multipart_member(item)
+        content, shaped = multipart_member(item, _shaped(plan))
         media_type = part.content_type or shaped
     return _entry(part.name, content, media_type, part.headers)
 
@@ -550,7 +560,7 @@ class MultipartForm:
     """How a form-data body is written: the parts a call gives, checked by its members' plans, or an object's members.
 
     An object's members are written in the media types of their encodings, and a member in `encoded` writes a part for
-    each name and value its query style gives.
+    each name and value its query style gives. With `members`, `parts` plans the members written as JSON.
     """
 
     parts: tuple[PartPlan, ...] | None = None
@@ -568,6 +578,7 @@ class MultipartForm:
             dict(self.content_types) if self.content_types else None,
             {plan.name: plan for plan in self.encoded} if self.encoded else None,
             sent,
+            {plan.name: plan for plan in self.parts} if self.parts else None,
         )
 
 

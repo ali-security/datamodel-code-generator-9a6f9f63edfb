@@ -73,6 +73,7 @@ paths:
                 f: {type: string, format: binary}
                 g: {type: object}
                 h: {type: string, format: binary}
+                i: {type: string}
             encoding:
               other: {contentType: text/plain}
               a:
@@ -85,6 +86,7 @@ paths:
               e: {contentType: 'text/*'}
               f: {contentType: 'image/*'}
               g: {contentType: text/plain}
+              i: {contentType: 'application/json; a="x,y"'}
               h: {style: form}
       responses:
         '204':

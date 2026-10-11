@@ -80,7 +80,7 @@ OPERATION_1: Final[OperationPlan[SubmitProfileResponse]] = OperationPlan(
     path='/profiles',
     servers=_SERVERS_0,
     responses=ResponseDecoder((empty_branch('204'),), ()),
-    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', codec=model_bindings.codec_2, form=MultipartForm(members=True)),), default='multipart/form-data', required=True),
+    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', codec=model_bindings.codec_2, form=MultipartForm(members=True, parts=(PartPlan('address', 'json'),))),), default='multipart/form-data', required=True),
 )
 
 OPERATION_2: Final[OperationPlan[ReadProfileResponse]] = OperationPlan(
@@ -132,7 +132,7 @@ OPERATION_7: Final[OperationPlan[SubmitUploadResponse]] = OperationPlan(
     path='/uploads',
     servers=_SERVERS_0,
     responses=ResponseDecoder((empty_branch('204'),), ()),
-    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('id', codec=model_bindings.codec_18), PartPlan('title', codec=model_bindings.codec_19), PartPlan('count', codec=model_bindings.codec_20), PartPlan('tags', repeated=True, codec=model_bindings.codec_21), PartPlan('meta', codec=model_bindings.codec_22), PartPlan('photo'), PartPlan('pages', repeated=True)), additional=PartPlan('', codec=model_bindings.codec_23))),), default='multipart/form-data', required=True),
+    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('id', codec=model_bindings.codec_18), PartPlan('title', codec=model_bindings.codec_19), PartPlan('count', codec=model_bindings.codec_20), PartPlan('tags', repeated=True, codec=model_bindings.codec_21), PartPlan('meta', 'json', codec=model_bindings.codec_22), PartPlan('photo'), PartPlan('pages', repeated=True)), additional=PartPlan('', codec=model_bindings.codec_23))),), default='multipart/form-data', required=True),
 )
 
 OPERATION_8: Final[OperationPlan[ReadUploadResponse]] = OperationPlan(
@@ -212,7 +212,7 @@ OPERATION_16: Final[OperationPlan[SubmitCoverResponse]] = OperationPlan(
     path='/covers',
     servers=_SERVERS_0,
     responses=ResponseDecoder((empty_branch('204'),), ()),
-    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('note', codec=model_bindings.codec_35, content_types=('text/plain; charset=utf-16',)), PartPlan('size', codec=model_bindings.codec_36, content_types=('application/json',)), PartPlan('meta', codec=model_bindings.codec_37, content_types=('application/vnd.meta+json',)), PartPlan('cover', content_types=('image/png', 'image/jpeg')), PartPlan('scans', repeated=True, content_types=('image/*',)), PartPlan('extra', codec=model_bindings.codec_38, content_types=('text/plain',))), additional=PartPlan(''))),), default='multipart/form-data', required=True),
+    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('note', codec=model_bindings.codec_35, content_types=('text/plain; charset=utf-16',)), PartPlan('size', codec=model_bindings.codec_36, content_types=('application/json',)), PartPlan('meta', 'json', codec=model_bindings.codec_37, content_types=('application/vnd.meta+json',)), PartPlan('cover', content_types=('image/png', 'image/jpeg')), PartPlan('scans', repeated=True, content_types=('image/*',)), PartPlan('extra', codec=model_bindings.codec_38, content_types=('text/plain',))), additional=PartPlan(''))),), default='multipart/form-data', required=True),
 )
 
 OPERATION_17: Final[OperationPlan[SubmitCardResponse]] = OperationPlan(
@@ -239,7 +239,7 @@ OPERATION_19: Final[OperationPlan[SubmitAlbumResponse]] = OperationPlan(
     path='/albums',
     servers=_SERVERS_0,
     responses=ResponseDecoder((empty_branch('204'),), ()),
-    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('photo'), PartPlan('bounds', codec=model_bindings.codec_39, style=ParameterPlan(location='query', name='bounds', style='form', explode=True, shape='object', fields=(FieldPlan('w', 'integer'),), additional=FieldPlan('', 'integer'), reserved_names=('photo', 'tags', 'title'))), PartPlan('title', codec=model_bindings.codec_40), PartPlan('tags', codec=model_bindings.codec_41, style=ParameterPlan(location='query', name='tags', style='spaceDelimited', shape='array', reserved_names=('bounds', 'photo', 'title')))), additional=PartPlan(''))),), default='multipart/form-data', required=True),
+    body=RequestBody(media=(BodyMedia(media_type='multipart/form-data', kind='multipart', form=MultipartForm(parts=(PartPlan('photo'), PartPlan('bounds', 'json', codec=model_bindings.codec_39, style=ParameterPlan(location='query', name='bounds', style='form', explode=True, shape='object', fields=(FieldPlan('w', 'integer'),), additional=FieldPlan('', 'integer'), reserved_names=('photo', 'tags', 'title'))), PartPlan('title', codec=model_bindings.codec_40), PartPlan('tags', codec=model_bindings.codec_41, style=ParameterPlan(location='query', name='tags', style='spaceDelimited', shape='array', reserved_names=('bounds', 'photo', 'title')))), additional=PartPlan(''))),), default='multipart/form-data', required=True),
 )
 
 OPERATION_20: Final[OperationPlan[StoreDocumentResponse]] = OperationPlan(

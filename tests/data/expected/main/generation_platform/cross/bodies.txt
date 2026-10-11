@@ -94,6 +94,26 @@ search refused parts
   > POST /searches [multipart/form-data; boundary=<boundary>]
   < 422 application/json
   ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","filter","minAge"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["body","filters",1,"minAge"],"msg":"<msg>"}]} [operation_id='search', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","filter","minAge"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["body","filters",1,"minAge"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","filter","minAge"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["body","filters",1,"minAge"],"msg":"<msg>"}]}', truncated=False]
+post_choices text
+  > POST /choices [multipart/form-data; boundary=<boundary>]
+  post_choices(body=Choices(either='plain', level=Level.a, words='s', lists=['x']))
+  < 204 -
+  = None
+post_choices values
+  > POST /choices [multipart/form-data; boundary=<boundary>]
+  post_choices(body=Choices(either=Filter(color='c', minAge=None), level=Level.int_1, words=['a', 'b'], lists=[1, 2]))
+  < 204 -
+  = None
+post_choice_files text
+  > POST /choice-files [multipart/form-data; boundary=<boundary>]
+  post_choice_files(body=FieldChoiceFilesPostRequest(either='plain', level=Level.a, words='s', lists=['x'], file=None))
+  < 204 -
+  = None
+post_choice_files values
+  > POST /choice-files [multipart/form-data; boundary=<boundary>]
+  post_choice_files(body=FieldChoiceFilesPostRequest(either=Filter(color='c', minAge=None), level=Level.int_1, words=['a', 'b'], lists=[1, 2], file=None))
+  < 204 -
+  = None
 post_check
   > POST /checks [application/json]
   post_check(body=Check(code=7, scores=[1, 2]))
