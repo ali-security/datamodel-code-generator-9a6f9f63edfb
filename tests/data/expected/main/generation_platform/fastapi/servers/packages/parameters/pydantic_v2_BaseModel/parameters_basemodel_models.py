@@ -84,6 +84,28 @@ FieldFilesFileNameGetPathFileNameParameter = TypeAliasType(
 )
 
 
+FieldPairsPairIdClassPartOfPartGetPathPairIdParameter = TypeAliasType(
+    "FieldPairsPairIdClassPartOfPartGetPathPairIdParameter",
+    Annotated[str, Field(pattern=r'^[a-z]+$')],
+)
+
+
+FieldPairsPairIdClassPartOfPartGetPathClassParameter = TypeAliasType(
+    "FieldPairsPairIdClassPartOfPartGetPathClassParameter", Annotated[int, Field(ge=1)]
+)
+
+
+FieldPairsPairIdClassPartOfPartGetPathPartParameter = TypeAliasType(
+    "FieldPairsPairIdClassPartOfPartGetPathPartParameter", Annotated[int, Field(ge=1)]
+)
+
+
+FieldPairsPairIdClassPartOfPartGetHeaderXRankParameter = TypeAliasType(
+    "FieldPairsPairIdClassPartOfPartGetHeaderXRankParameter",
+    Annotated[int, Field(ge=1)],
+)
+
+
 FieldMenüItemGetPathItemParameter = TypeAliasType(
     "FieldMenüItemGetPathItemParameter", Annotated[str, Field(pattern=r'^[a-z]+$')]
 )

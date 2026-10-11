@@ -1183,6 +1183,13 @@ def _registration(module: Module, spec: OperationSpec) -> Registration:
         keywords.append(Keyword("deprecated", "True"))
     if isinstance(description := _response_description(spec), str):
         keywords.append(Keyword("response_description", repr(description)))
+    if names := {
+        argument.native.alias: argument.wire_name
+        for argument in spec.arguments
+        if argument.location == "path" and argument.native is not None and argument.native.alias != argument.wire_name
+    }:
+        wire_named = module.local("_runtime.server.application", "wire_named")
+        keywords.append(Keyword("route_class_override", f"{wire_named}({names!r})"))
     return Registration(
         name=repr(spec.python_name),
         path=repr(spec.route.route_path),

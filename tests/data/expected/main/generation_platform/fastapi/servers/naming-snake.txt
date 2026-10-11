@@ -26,3 +26,5 @@ service UntaggedService without its methods: TypeError
 > GET /health
   get_health()
 < 204 - b''
+> GET /items/x?itemId=y&page[size]=z&itemId_1=w
+< 422 application/json [{"type": "int_parsing", "loc": ["path", "itemId"]}, {"type": "int_parsing", "loc": ["query", "itemId"]}, {"type": "int_parsing", "loc": ["query", "page[size]"]}, {"type": "int_parsing", "loc": ["query", "itemId_1"]}, {"type": "int_parsing", "loc": ["header", "itemId"]}]

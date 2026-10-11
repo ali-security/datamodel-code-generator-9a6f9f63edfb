@@ -542,8 +542,13 @@ routes added to the application later do not appear in it.
 models they declare. It describes what FastAPI derives: a parameter, header, or body that only an adapter reads
 does not appear in it. An application of your own that includes `build_router(...)` serves FastAPI's document
 too, unless it calls `serve_source_openapi(app, prefix=..., metadata=...)`, imported from the generated package,
-with the prefix the router is included under and the description settings to replace. Path placeholders that are
-not Python identifiers, or that repeat, appear in FastAPI's document under the route's own placeholder names.
+with the prefix the router is included under and the description settings to replace.
+
+A path placeholder that is no Python identifier or is a keyword, that repeats, or whose name an argument of the
+endpoint already takes, such as `{request}`, is registered under a name of the route's own, such as `{dcg_p0}` for
+`{item-id}`, because Starlette matches a placeholder by an identifier. FastAPI's document shows that name for the
+placeholder and its parameter, and so do `request.path_params`, `url_path_for`, and the route path in FastAPI's log
+messages. The `loc` of a validation error does not: it names the parameter as the source document does.
 
 ## Production settings
 
@@ -554,6 +559,13 @@ response carries each record's `type`, `loc`, and `msg`, so it does not return t
 and `msg` are still pydantic's and can hold text the client chose: a key of a mapping or an unexpected field in
 `loc`, a discriminator tag in `msg`, and whatever a validator of your own puts in its error message. Parameters and
 bodies that adapters read answer with the same three keys.
+
+`loc` names what the request carries, not the method argument it becomes: a parameter by its location and its name
+in the source document, such as `["path", "item-id"]`, `["query", "page[size]"]`, or `["header", "X-Trace-Id"]`,
+and a body member by the name the model reads it under, its alias when it has one. That holds whatever
+`--snake-case-field`, `--aliases`, or `--server-parameter-names` call the argument, and for a path placeholder the
+route registers under a name of its own: the route puts the source name back into FastAPI's records before any
+exception handler receives them, so FastAPI's default handler and a handler of your own see it too.
 
 - `create_app` registers the handler, `validation_error_handler`, through FastAPI's `exception_handlers`. Pass
   your own `exception_handlers` to send other error bodies, for example ones without `loc` and `msg`; an entry

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Awaitable, Callable, Mapping, Sequence
+from collections.abc import Awaitable, Callable, Coroutine, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final, TypeAlias, TypeGuard, TypeVar, cast
 from urllib.parse import unquote_to_bytes
@@ -20,6 +20,7 @@ from typing_extensions import TypeIs
 
 if TYPE_CHECKING:
     from starlette.requests import Request
+    from starlette.responses import Response
     from starlette.types import Receive, Scope, Send
 
 MethodT = TypeVar("MethodT")
@@ -77,6 +78,35 @@ class RawPathRoute(APIRoute):
                 for name, value in scope["path_params"].items()
             }
         await super().handle(scope, receive, send)
+
+
+def wire_named(names: Mapping[str, str]) -> type[RawPathRoute]:
+    """Return a RawPathRoute class whose validation errors locate renamed path placeholders by their wire names.
+
+    FastAPI reads a path parameter by the name its placeholder has in the route path, and locates its records by that
+    name. `names` gives the wire name of each renamed placeholder FastAPI reads; only a request that fails validation
+    looks one up, before any exception handler receives the error.
+    """
+
+    class WireNamedRoute(RawPathRoute):
+        def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
+            handler = super().get_route_handler()
+
+            async def named(request: Request) -> Response:
+                try:
+                    return await handler(request)
+                except RequestValidationError as error:
+                    for record in error.errors():
+                        match record:
+                            case {"loc": ("path", str(), *_)} if (wire := names.get(record["loc"][1])) is not None:
+                                record["loc"] = ("path", wire, *record["loc"][2:])
+                            case _:
+                                pass
+                    raise
+
+            return named
+
+    return WireNamedRoute
 
 
 def _segmented(scope: Scope) -> str | None:

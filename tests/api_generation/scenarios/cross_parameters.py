@@ -1,6 +1,7 @@
 """Call the parameters server through its client: cookies, deepObject, unexploded and header arrays, content, enums.
 
 The document also holds repeated path placeholders, dotted and non-ASCII names, root model and literal defaults.
+A refused path parameter is reported under the name the document gives it, however the route path spells it.
 """
 
 from __future__ import annotations
@@ -56,6 +57,10 @@ def calls(kit: Kit) -> Calls:
         ("repeat", lambda: api.default.repeat(id=5)),
         ("get_note", lambda: api.default.get_note(note_id=3)),
         ("get_file", lambda: api.default.get_file(file_name="a.txt")),
+        ("get_file refused name", lambda: api.default.get_file(file_name="A.txt")),
+        ("get_pair", lambda: api.default.get_pair(pair_id="ab", class_=2, part=3, X_Rank=4)),
+        ("get_pair refused names", lambda: api.default.get_pair(pair_id="AB", class_=0, part=3, X_Rank=0)),
+        ("get_pair refused part", lambda: api.default.get_pair(pair_id="ab", class_=2, part=0)),
         ("get_menu", lambda: api.default.get_menu(item="abc")),
         (
             "get_item every parameter",

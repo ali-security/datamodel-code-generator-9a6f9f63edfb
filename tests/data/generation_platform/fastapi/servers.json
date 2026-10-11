@@ -371,6 +371,18 @@
   "parameters": {
     "input": "server-parameters.yaml",
     "services": "parameters",
+    "config": {
+      "server_parameter_names": {
+        "/paths/~1pairs~1{pair.id}~1{class}~1{part}~1of~1{part}/get": {
+          "path:class": "kind"
+        }
+      }
+    },
+    "model": {
+      "aliases": {
+        "pair.id": "pair"
+      }
+    },
     "apps": [
       {
         "set": "default",
@@ -710,6 +722,28 @@
           {
             "method": "GET",
             "url": "/items/1?ratio=1e999"
+          },
+          {
+            "method": "GET",
+            "url": "/pairs/ab/2/3/of/3",
+            "headers": {
+              "X_Rank": "4"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "/pairs/AB/x/3/of/3",
+            "headers": {
+              "X_Rank": "y"
+            }
+          },
+          {
+            "method": "GET",
+            "url": "/pairs/AB/x/y/of/y"
+          },
+          {
+            "method": "GET",
+            "url": "/pairs/ab/2/1/of/2"
           }
         ]
       },
@@ -727,6 +761,10 @@
           {
             "method": "GET",
             "url": "/a/b/men%C3%BC/tea"
+          },
+          {
+            "method": "GET",
+            "url": "/a/b/pairs/AB/0/3/of/3"
           }
         ]
       },
@@ -756,11 +794,17 @@
           {
             "method": "GET",
             "url": "/nowhere/a%2Fb"
+          },
+          {
+            "method": "GET",
+            "url": "/pairs/AB/0/3/of/3"
           }
         ]
       }
     ],
-    "package_snapshots": []
+    "package_snapshots": [
+      "pydantic_v2.BaseModel"
+    ]
   },
   "kinds": {
     "input": "server-kinds.yaml",
@@ -3989,6 +4033,13 @@
       {
         "method": "GET",
         "url": "/health"
+      },
+      {
+        "method": "GET",
+        "url": "/items/x?itemId=y&page[size]=z&itemId_1=w",
+        "headers": {
+          "itemId": "v"
+        }
       }
     ],
     "package_snapshots": []
@@ -4032,6 +4083,13 @@
       {
         "method": "GET",
         "url": "/health"
+      },
+      {
+        "method": "GET",
+        "url": "/items/x?itemId=y&page[size]=z&itemId_1=w",
+        "headers": {
+          "itemId": "v"
+        }
       }
     ],
     "package_snapshots": []

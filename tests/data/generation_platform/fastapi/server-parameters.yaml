@@ -65,6 +65,16 @@ paths:
         - {name: file.name, in: path, required: true, schema: {type: string, pattern: "^[a-z]+\\.txt$"}}
       responses:
         "204": {description: Done.}
+  /pairs/{pair.id}/{class}/{part}/of/{part}:
+    get:
+      operationId: getPair
+      parameters:
+        - {name: pair.id, in: path, required: true, schema: {type: string, pattern: "^[a-z]+$"}}
+        - {name: class, in: path, required: true, schema: {type: integer, minimum: 1}}
+        - {name: part, in: path, required: true, schema: {type: integer, minimum: 1}}
+        - {name: X_Rank, in: header, schema: {type: integer, minimum: 1}}
+      responses:
+        "204": {description: Done.}
   /menü/{item}:
     get:
       operationId: getMenu

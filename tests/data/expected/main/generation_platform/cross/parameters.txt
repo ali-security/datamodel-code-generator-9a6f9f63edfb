@@ -59,6 +59,23 @@ get_file
   get_file(file_name='a.txt')
   < 204 -
   = None
+get_file refused name
+  > GET /files/A.txt
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"string_pattern_mismatch","loc":["path","file.name"],"msg":"<msg>"}]} [operation_id='getFile', status_code=422, body=b'{"detail":[{"type":"string_pattern_mismatch","loc":["path","file.name"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"string_pattern_mismatch","loc":["path","file.name"],"msg":"<msg>"}]}', truncated=False]
+get_pair
+  > GET /pairs/ab/2/3/of/3
+  get_pair(pair_id='ab', class_=2, part=3, X_Rank=4)
+  < 204 -
+  = None
+get_pair refused names
+  > GET /pairs/AB/0/3/of/3
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"string_pattern_mismatch","loc":["path","pair.id"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["path","class"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["header","X_Rank"],"msg":"<msg>"}]} [operation_id='getPair', status_code=422, body=b'{"detail":[{"type":"string_pattern_mismatch","loc":["path","pair.id"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["path","class"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["header","X_Rank"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"string_pattern_mismatch","loc":["path","pair.id"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["path","class"],"msg":"<msg>"},{"type":"greater_than_equal","loc":["header","X_Rank"],"msg":"<msg>"}]}', truncated=False]
+get_pair refused part
+  > GET /pairs/ab/2/0/of/0
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["path","part"],"msg":"<msg>"}]} [operation_id='getPair', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["path","part"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["path","part"],"msg":"<msg>"}]}', truncated=False]
 get_menu
   > GET /men%C3%BC/abc
   get_menu(item='abc')

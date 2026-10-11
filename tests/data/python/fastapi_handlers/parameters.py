@@ -41,6 +41,9 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         def get_file(self, **arguments: object) -> None:
             record("get_file", arguments)
 
+        def get_pair(self, **arguments: object) -> None:
+            record("get_pair", arguments)
+
         def get_menu(self, **arguments: object) -> None:
             record("get_menu", arguments)
 

@@ -1,6 +1,6 @@
 # parameters
 serve pydantic_v2.BaseModel
-service UntaggedService: get_codes, get_file, get_item, get_menu, get_note, get_ratios, get_sizes, repeat, search
+service UntaggedService: get_codes, get_file, get_item, get_menu, get_note, get_pair, get_ratios, get_sizes, repeat, search
 service UntaggedService without its methods: TypeError
 app default
 > GET /search
@@ -89,16 +89,16 @@ app default
   get_note(note_id=7)
 < 204 - b''
 > GET /notes/seven
-< 422 application/json [{"type": "int_parsing", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "int_parsing", "loc": ["path", "note.id"]}]
 > GET /files/a.txt
   get_file(file_name='a.txt')
 < 204 - b''
 > GET /files/A.txt
-< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "file.name"]}]
 > GET /files/a%2Fb.txt
-< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "file.name"]}]
 > GET /files/a%2fb.txt
-< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "file.name"]}]
 > GET /files/a%2Fb.txt (without raw_path)
 < 404 application/json {"detail":"Not Found"}
 > GET /files/a%2Fb.txt/
@@ -107,7 +107,7 @@ app default
   get_file(file_name='a.txt')
 < 204 - b''
 > GET /notes/7%2F8
-< 422 application/json [{"type": "int_parsing", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "int_parsing", "loc": ["path", "note.id"]}]
 > GET /repeat/1%2F2/again/1%2F2
 < 422 application/json [{"type": "int_parsing", "loc": ["path", "id"]}]
 > GET /men%C3%BC/tea
@@ -161,21 +161,32 @@ app default
 > GET /items/1?levels=%EF%BC%91
 < 422 application/json [{"type": "enum", "loc": ["query", "levels", 0]}]
 > GET /notes/%D9%A7
-< 422 application/json [{"type": "int_parsing", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "int_parsing", "loc": ["path", "note.id"]}]
 > GET /items/1?ratio=1e999
 < 422 application/json [{"type": "enum", "loc": ["query", "ratio"]}]
+> GET /pairs/ab/2/3/of/3
+  get_pair(pair='ab', kind=2, part=3, X_Rank=4)
+< 204 - b''
+> GET /pairs/AB/x/3/of/3
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "pair.id"]}, {"type": "int_parsing", "loc": ["path", "class"]}, {"type": "int_parsing", "loc": ["header", "X_Rank"]}]
+> GET /pairs/AB/x/y/of/y
+< 422 application/json [{"type": "int_parsing", "loc": ["path", "part"]}]
+> GET /pairs/ab/2/1/of/2
+< 422 application/json [{"type": "value_error", "loc": ["path", "part"]}]
 app mounted
 > GET /a%2Fb/files/a.txt
   get_file(file_name='a.txt')
 < 204 - b''
 > GET /a/b/files/a%2Fb.txt
-< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "dcg_p0"]}]
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "file.name"]}]
 > GET /a/b/men%C3%BC/tea
   get_menu(item='tea')
 < 204 - b''
+> GET /a/b/pairs/AB/0/3/of/3
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "pair.id"]}, {"type": "greater_than_equal", "loc": ["path", "class"]}]
 app extended
 > GET /files/a%2Fb.txt
-< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "dcg_p0"], "input": "a/b.txt", "ctx": {"pattern": "^[a-z]+\\.txt$"}}]
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "file.name"], "input": "a/b.txt", "ctx": {"pattern": "^[a-z]+\\.txt$"}}]
 > GET /user/a%2Fb
 < 200 application/json {"path":"/user/a/b","params":{"name":"a/b"}}
 > GET /echo/a%2Fb
@@ -186,3 +197,5 @@ app extended
 < 200 application/json {"path":"/mounted/a/b","params":{"rest":"a/b"}}
 > GET /nowhere/a%2Fb
 < 404 application/json {"detail":"Not Found"}
+> GET /pairs/AB/0/3/of/3
+< 422 application/json [{"type": "string_pattern_mismatch", "loc": ["path", "pair.id"], "input": "AB", "ctx": {"pattern": "^[a-z]+$"}}, {"type": "greater_than_equal", "loc": ["path", "class"], "input": "0", "ctx": {"ge": 1}}]
