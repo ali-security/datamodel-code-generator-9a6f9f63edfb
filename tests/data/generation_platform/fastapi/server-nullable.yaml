@@ -61,6 +61,16 @@ paths:
             schema: {$ref: "#/components/schemas/Pet"}
       responses:
         "204": {description: Done.}
+  /codes:
+    post:
+      operationId: postCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: string, x-python-type: "str | None"}
+      responses:
+        "204": {description: Done.}
   /values:
     post:
       operationId: postValue

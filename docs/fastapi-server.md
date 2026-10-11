@@ -404,14 +404,14 @@ bytes, and `--check` reports a module that differs.
 ## Models and adapters
 
 The generated models are the runtime contract. Routes declare the model types directly: a JSON body is
-`Annotated[Model, Body()]`, a URL-encoded form of a `BaseModel` is a FastAPI form model, a primary JSON response is
-`response_model=Model`, and path, query, header, and cookie parameters are `Annotated` FastAPI parameters of the
-parameter's model type. A parameter's root model or type alias is unwrapped to its type when that type alone
-validates the same, so the method receives the value. A default that the parameter's schema declares reaches the
-method whenever the request omits the parameter, however the model options spell the type, such as with
-`--use-annotated` or `--field-constraints`; a parameter whose type stays a root model receives that model with its
-own default. How strictly a value follows the OpenAPI document is decided by the model generation options, not by
-the server.
+`Annotated[Model, Body()]` unless an adapter reads it, as below, a URL-encoded form of a `BaseModel` is a FastAPI form
+model, a primary JSON response is `response_model=Model`, and path, query, header, and cookie parameters are
+`Annotated` FastAPI parameters of the parameter's model type. A parameter's root model or type alias is unwrapped to
+its type when that type alone validates the same, so the method receives the value. A default that the parameter's
+schema declares reaches the method whenever the request omits the parameter, however the model options spell the type,
+such as with `--use-annotated` or `--field-constraints`; a parameter whose type stays a root model receives that model
+with its own default. How strictly a value follows the OpenAPI document is decided by the model generation options,
+not by the server.
 
 FastAPI cannot read some inputs, so a generated adapter reads them and validates the result with the model's
 `TypeAdapter`: deepObject, label, matrix, spaceDelimited, and pipeDelimited parameters, parameters with `content`,
@@ -422,10 +422,18 @@ the method as its model, with uploads read to `bytes`.
 
 FastAPI takes the JSON `null` of a required body for an omitted one, so an adapter also reads a required JSON body
 whose model type accepts `null`, such as a `nullable: true` string, a union with `null`, or a schema of any value: the
-method receives what the model validates `null` as, `None` or the root model that holds it, and an omitted or empty
-body still answers `422` with a `missing` record at `["body"]`. A required JSON body whose type rejects `null` stays
-FastAPI's and answers `null` with that record, and an optional one stays FastAPI's too: its method receives `None`
-for `null` as for an omitted body.
+method receives what the model validates `null` as, `None` or the root model that holds it. `--force-optional` makes
+every root model and type alias accept `null`, so every required JSON body of one, such as a string, an array, or a
+union, is read this way. A required JSON body whose type rejects `null` stays FastAPI's and answers `null` with a
+`missing` record at `["body"]`, and an optional one stays FastAPI's too: its method receives `None` for `null` as for
+an omitted body.
+
+A body that an adapter reads needs a Content-Type the operation declares: `application/json` with or without
+parameters for a body declared as `application/json`, but not another `+json` type, which FastAPI's own reading
+accepts. A request with any other Content-Type, or with a body and none, answers `415`. For a required body, so does
+an empty body with an undeclared Content-Type, while an empty body without a Content-Type, or with a declared JSON
+one, answers `422` with a `missing` record at `["body"]`. The JSON is read as UTF-8 without a byte order mark: a body
+that starts with one, or is UTF-16, answers `422` with `json_invalid`, where FastAPI's own reading accepts both.
 
 A multipart part is text when the type of its member, or of the member's items for an array, has one scalar kind,
 with one part for each item of an array. A part of any other member is JSON, as the generated client sends it: an
@@ -467,7 +475,8 @@ A parameter with JSON `content`, like a JSON part of a multipart form, is parsed
 a `Decimal` field gets the float's value (`0.1000000000000000000000000001` becomes `Decimal("0.1")`) and `NaN` and
 `Infinity` reach a `float` field; an object that repeats a member keeps the last value; and text that is not JSON, or
 JSON past pydantic's limits such as an integer of thousands of digits or deep nesting, answers `422` with
-`json_invalid`.
+`json_invalid`. With pydantic older than 2.14, an enum that has a `null` member accepts any JSON value as that member
+when it is read from JSON, in bodies, JSON parts, and parameters with JSON `content` that adapters read.
 A strict bytes type (`--strict-types bytes` with `format: binary`) cannot be a path, query,
 header, or cookie parameter, since a parameter carries text: generation stops with an error that names it.
 A path, query, header, or cookie parameter whose schema mixes scalar kinds keeps every member when one of them is a

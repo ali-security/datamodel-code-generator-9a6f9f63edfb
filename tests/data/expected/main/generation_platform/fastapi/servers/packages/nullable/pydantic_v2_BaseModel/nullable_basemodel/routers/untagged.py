@@ -222,6 +222,40 @@ def _add_post_pet(
     )
 
 
+def _add_post_code(
+    router: APIRouter,
+    wiring: Wiring,
+) -> None:
+    untagged: UntaggedService = wiring.services['untagged']
+    post_code_handler = checked(
+        untagged.post_code,
+        'The untagged.post_code method of POST /codes',
+    )
+
+    def post_code(
+        *,
+        body: Annotated[nullable_basemodel_models.FieldCodesPostRequest, Depends(contract.PostCode.BODY)],
+    ) -> object:
+        return dispatch(
+            post_code_handler(
+                body=body,
+            ),
+            contract.PostCode.RESPONSES,
+        )
+
+    router.add_api_route(
+        '/codes',
+        post_code,
+        methods=['POST'],
+        status_code=204,
+        response_model=None,
+        response_class=Response,
+        operation_id='postCode',
+        response_description='Done.',
+        dependencies=wiring.dependencies.get('post_code'),
+    )
+
+
 def _add_post_value(
     router: APIRouter,
     wiring: Wiring,
@@ -399,6 +433,7 @@ LITERAL_ROUTES: Final = (
     ('post_color', _add_post_color),
     ('post_name', _add_post_name),
     ('post_pet', _add_post_pet),
+    ('post_code', _add_post_code),
     ('post_value', _add_post_value),
     ('post_anything', _add_post_anything),
     ('post_item', _add_post_item),

@@ -78,6 +78,16 @@ class UntaggedService(Protocol):
         """
 
     @abstractmethod
+    def post_code(
+        self,
+        *,
+        body: nullable_basemodel_models.FieldCodesPostRequest,
+    ) -> None | HTTPResult[None] | Response:
+        """
+        Handle POST /codes.
+        """
+
+    @abstractmethod
     def post_value(
         self,
         *,

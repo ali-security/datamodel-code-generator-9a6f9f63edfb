@@ -53,6 +53,7 @@ PRESET = pytest.mark.skipif(sys.version_info < (3, 12), reason="the quick-start 
         "nullable",
         "nullable-3-0",
         "nullable-alias",
+        "nullable-force-optional",
         "results",
         "security",
         "security-templates",

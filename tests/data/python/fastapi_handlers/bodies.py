@@ -72,6 +72,9 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         def post_pet(self, **arguments: object) -> None:
             record("post_pet", arguments)
 
+        def post_code(self, **arguments: object) -> None:
+            record("post_code", arguments)
+
         def post_value(self, **arguments: object) -> None:
             record("post_value", arguments)
 
