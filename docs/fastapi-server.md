@@ -216,9 +216,10 @@ work for them as well. See [Target Generation Options](cli-reference/target-gene
 Operations are grouped by their first tag, under the key `tag:<tag>`, and operations without a tag under the key
 `default`, which makes the `default` router module, the `DefaultService` Protocol, and the `default=` argument of
 `create_app` and `build_router`; the generated client calls the same operations `client.default`. A tag whose name
-also derives `default` is another group, numbered apart as other derived names are, such as `default_1`. With
-`--server-layout single`, every operation is in the group `all`: one `routes.py`, one `Service` Protocol, and the
-argument `service=`.
+also derives `default`, such as `default` or `Default`, is another group: on the server and the client alike, the
+one declared first keeps `default` and the other takes a number, such as `default_1`, as other derived names do.
+With `--server-layout single`, every operation is in the group `all`: one `routes.py`, one `Service` Protocol, and
+the argument `service=`.
 
 `--server-handler-modes`, `--server-body-modes`, `--server-primary-responses`, `--server-operation-names`,
 `--server-router-names`, and `--server-parameter-names` take a JSON object, inline or as the path of a JSON file, as

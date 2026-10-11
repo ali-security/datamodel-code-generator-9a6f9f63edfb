@@ -104,10 +104,13 @@ JSON on the command line and for mappings given to `generate()`.
 
 `--client-resource-names` maps a tag to the dotted namespace of the resource its operations join, such as
 `{"pets": "store.pets"}`. Operations without a tag join the resource `default`, as in `client.default.get_health()`,
-the name the generated FastAPI server gives their group; no `--client-resource-names` entry names them, so the
-`resource` of a `--client-operations` entry moves one of them to another resource. `--client-operations` maps an
-operation reference, the JSON pointer of the path item method such as `/paths/~1pets/get`, or a document and a pointer
-joined by `#`, to the settings of that operation:
+the name the generated FastAPI server gives their group. Its name is derived like a tag's: beside a tag that also
+derives `default`, such as `default` or `Default`, the one declared first keeps `default` and the other takes a
+number, such as `default_1`, as on the server. No `--client-resource-names` entry names the operations without a tag,
+so the `resource` of a `--client-operations` entry moves one of them to another resource. An explicit namespace is
+shared by everything that names it: a tag mapped to `default`, or an operation whose `resource` is `default`, joins
+the resource of that name. `--client-operations` maps an operation reference, the JSON pointer of the path item
+method such as `/paths/~1pets/get`, or a document and a pointer joined by `#`, to the settings of that operation:
 
 | Member | Value |
 |---|---|

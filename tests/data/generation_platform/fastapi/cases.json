@@ -85,13 +85,7 @@
     ]
   },
   "names-default": {
-    "input": "naming.yaml",
-    "config": {
-      "server_router_names": {
-        "tag:close": "default",
-        "untagged": "misc"
-      }
-    },
+    "input": "naming-default.yaml",
     "package_snapshots": [],
     "readme": [
       "pydantic_v2.BaseModel"

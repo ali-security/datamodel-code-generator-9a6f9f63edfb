@@ -1,15 +1,11 @@
 # names-default
 render pydantic_v2.BaseModel
-  models.py
   server/__init__.py
   server/application.py
   server/routers/__init__.py
-  server/routers/item_store.py
-  server/routers/item_store_1.py
-  server/routers/default_1.py
   server/routers/default.py
+  server/routers/default_1.py
   server/routers/default_2.py
-  server/routers/default_3.py
   server/routers/untagged.py
   server/_generated/__init__.py
   server/_generated/contract.py

@@ -1,6 +1,6 @@
-# Naming
+# Default names
 
-The `server` package serves the Naming API with FastAPI.
+The `server` package serves the Default names API with FastAPI.
 datamodel-code-generator generated it from the OpenAPI document, together with the `models` models of the `pydantic_v2.BaseModel` backend.
 Generation overwrites every file of the package, as it does the models: keep your code in modules outside the package and regenerate the package instead of editing it; see [Regenerating](#regenerating).
 
@@ -12,14 +12,9 @@ Custom templates, base classes, and Python types stay within these two backends.
 
 | Service | Method | HTTP method | Path | Operation reference |
 | --- | --- | --- | --- | --- |
-| `ItemStoreService` | `get_item` | GET | `/items/{itemId}` | `/paths/~1items~1{itemId}/get` |
-| `ItemStoreService` | `get_item_1` | POST | `/items` | `/paths/~1items/post` |
-| `ItemStore1Service` | `delete_items_by_item_id_tags` | DELETE | `/items/{itemId}/tags` | `/paths/~1items~1{itemId}~1tags/delete` |
-| `Default1Service` | `x1` | GET | `/x1` | `/paths/~1x1/get` |
-| `Default1Service` | `x_1` | GET | `/x_1` | `/paths/~1x_1/get` |
-| `DefaultService` | `get_health` | GET | `/health` | `/paths/~1health/get` |
-| `Default2Service` | `list_defaults` | GET | `/defaults` | `/paths/~1defaults/get` |
-| `Default3Service` | `list_upper_defaults` | GET | `/defaults/upper` | `/paths/~1defaults~1upper/get` |
+| `DefaultService` | `list_defaults` | GET | `/defaults` | `/paths/~1defaults/get` |
+| `Default1Service` | `ping` | GET | `/ping` | `/paths/~1ping/get` |
+| `Default2Service` | `list_upper_defaults` | GET | `/defaults/upper` | `/paths/~1defaults~1upper/get` |
 | `UntaggedService` | `list_untagged` | GET | `/untagged` | `/paths/~1untagged/get` |
 
 `operation_dependencies` takes the method names, the keys of `OperationDependencies`; the per-operation generation settings, such as `--server-handler-modes`, take the operation references.
@@ -34,30 +29,18 @@ The package looks each method up when it registers the routes, and refuses a cor
 
 ```python
 from server import create_app
-from server.services import ItemStoreService, ItemStore1Service, Default1Service, DefaultService, Default2Service, Default3Service, UntaggedService
-
-
-class ItemStore(ItemStoreService):
-    """Implement `get_item` and `get_item_1`."""
-
-
-class ItemStore1(ItemStore1Service):
-    """Implement `delete_items_by_item_id_tags`."""
-
-
-class Default1(Default1Service):
-    """Implement `x1` and `x_1`."""
+from server.services import DefaultService, Default1Service, Default2Service, UntaggedService
 
 
 class Default(DefaultService):
-    """Implement `get_health`."""
-
-
-class Default2(Default2Service):
     """Implement `list_defaults`."""
 
 
-class Default3(Default3Service):
+class Default1(Default1Service):
+    """Implement `ping`."""
+
+
+class Default2(Default2Service):
     """Implement `list_upper_defaults`."""
 
 
@@ -65,7 +48,7 @@ class Untagged(UntaggedService):
     """Implement `list_untagged`."""
 
 
-app = create_app(item_store=ItemStore(), item_store_1=ItemStore1(), default_1=Default1(), default=Default(), default_2=Default2(), default_3=Default3(), untagged=Untagged())
+app = create_app(default=Default(), default_1=Default1(), default_2=Default2(), untagged=Untagged())
 ```
 
 Run the application with any ASGI server, such as `uvicorn app:app` for a module named `app.py`.
@@ -78,7 +61,7 @@ from fastapi import FastAPI
 from server import build_router
 
 app = FastAPI(lifespan=lifespan, exception_handlers=exception_handlers)
-app.include_router(build_router(item_store=ItemStore(), item_store_1=ItemStore1(), default_1=Default1(), default=Default(), default_2=Default2(), default_3=Default3(), untagged=Untagged()))
+app.include_router(build_router(default=Default(), default_1=Default1(), default_2=Default2(), untagged=Untagged()))
 ```
 
 ## Served OpenAPI document

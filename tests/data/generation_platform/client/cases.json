@@ -850,9 +850,8 @@
     "modules": false
   },
   "naming-default": {
-    "input": "naming.yaml",
-    "config": {"resource_names": [{"tag": "close", "namespace": "default"}]},
-    "modules": false
+    "input": "naming-default.yaml",
+    "modules": [["client", "_operations.py"]]
   },
   "method-collisions": {
     "input": "method-collisions.yaml",

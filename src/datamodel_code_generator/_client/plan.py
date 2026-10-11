@@ -506,33 +506,32 @@ class Planner:
             )
 
     def resource(self, operation: OperationContract, setting: ClientOperationConfig | None) -> str:
-        """Return the operation's resource namespace: explicit, its first tag's mapped or derived name, or default.
+        """Return the operation's resource namespace: explicit, or its first tag's mapped or derived name.
 
-        Each other tag derives a new name beside the clients' members; a Windows device name needs an explicit one.
+        Operations without a tag share the name `default` derives. Each other tag derives a new name beside the
+        clients' members; a Windows device name needs an explicit one.
         """
         if setting is not None and setting.resource is not None:
             return setting.resource
-        if not (tags := _tags(operation)):
-            return "default"
-        if (mapped := self.resource_names.get(tags[0])) is not None:
+        if (tags := _tags(operation)) and (mapped := self.resource_names.get(tags[0])) is not None:
             return mapped
-        return self.namespaces[tags[0]]
+        return self.namespaces[tags[0] if tags else None]
 
-    def tag_namespaces(self) -> dict[str, str]:
+    def tag_namespaces(self) -> dict[str | None, str]:
         """Name the resource of each first tag that no setting names, apart from the clients' members and each other.
 
-        A Windows device name needs an explicit one.
+        The operations without a tag that no setting names form one more resource, under the key None, whose name
+        derives from `default` among the tags' names in declaration order. A Windows device name needs an explicit
+        one.
         """
-        first: dict[str, OperationContract] = {}
+        first: dict[str | None, OperationContract] = {}
         for operation in self.request.operations:
             setting = self.settings.get(operation.id.use_site.pointer)
-            if (
-                (setting is None or setting.resource is None)
-                and (tags := _tags(operation))
-                and tags[0] not in self.resource_names
-            ):
-                first.setdefault(tags[0], operation)
-        bases = [self.names.function(tag) for tag in first]
+            if setting is not None and setting.resource is not None:
+                continue
+            if (tag := tags[0] if (tags := _tags(operation)) else None) not in self.resource_names:
+                first.setdefault(tag, operation)
+        bases = [self.names.function("default" if tag is None else tag) for tag in first]
         names = self.names.claim(
             NameScope(RESERVED_MEMBERS, folded=True),
             [(base, _local(operation), ()) for operation, base in zip(first.values(), bases, strict=True)],

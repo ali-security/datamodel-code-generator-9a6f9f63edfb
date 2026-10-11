@@ -11654,9 +11654,10 @@ work for them as well. See [Target Generation Options](cli-reference/target-gene
 Operations are grouped by their first tag, under the key `tag:<tag>`, and operations without a tag under the key
 `default`, which makes the `default` router module, the `DefaultService` Protocol, and the `default=` argument of
 `create_app` and `build_router`; the generated client calls the same operations `client.default`. A tag whose name
-also derives `default` is another group, numbered apart as other derived names are, such as `default_1`. With
-`--server-layout single`, every operation is in the group `all`: one `routes.py`, one `Service` Protocol, and the
-argument `service=`.
+also derives `default`, such as `default` or `Default`, is another group: on the server and the client alike, the
+one declared first keeps `default` and the other takes a number, such as `default_1`, as other derived names do.
+With `--server-layout single`, every operation is in the group `all`: one `routes.py`, one `Service` Protocol, and
+the argument `service=`.
 
 `--server-handler-modes`, `--server-body-modes`, `--server-primary-responses`, `--server-operation-names`,
 `--server-router-names`, and `--server-parameter-names` take a JSON object, inline or as the path of a JSON file, as
@@ -12216,10 +12217,13 @@ JSON on the command line and for mappings given to `generate()`.
 
 `--client-resource-names` maps a tag to the dotted namespace of the resource its operations join, such as
 `{"pets": "store.pets"}`. Operations without a tag join the resource `default`, as in `client.default.get_health()`,
-the name the generated FastAPI server gives their group; no `--client-resource-names` entry names them, so the
-`resource` of a `--client-operations` entry moves one of them to another resource. `--client-operations` maps an
-operation reference, the JSON pointer of the path item method such as `/paths/~1pets/get`, or a document and a pointer
-joined by `#`, to the settings of that operation:
+the name the generated FastAPI server gives their group. Its name is derived like a tag's: beside a tag that also
+derives `default`, such as `default` or `Default`, the one declared first keeps `default` and the other takes a
+number, such as `default_1`, as on the server. No `--client-resource-names` entry names the operations without a tag,
+so the `resource` of a `--client-operations` entry moves one of them to another resource. An explicit namespace is
+shared by everything that names it: a tag mapped to `default`, or an operation whose `resource` is `default`, joins
+the resource of that name. `--client-operations` maps an operation reference, the JSON pointer of the path item
+method such as `/paths/~1pets/get`, or a document and a pointer joined by `#`, to the settings of that operation:
 
 | Member | Value |
 |---|---|
