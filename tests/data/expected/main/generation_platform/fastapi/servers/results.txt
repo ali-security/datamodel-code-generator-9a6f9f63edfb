@@ -1,6 +1,6 @@
 # results
 serve pydantic_v2.BaseModel
-service UntaggedService: get_blob, get_latin, get_nothing, get_plain, get_result, head_result, post_empty
+service UntaggedService: get_blob, get_latin, get_nothing, get_plain, get_result, get_text, head_result, post_empty
 service UntaggedService without its methods: TypeError
 > GET /results?case=bare
   get_result(bare)
@@ -89,3 +89,13 @@ service UntaggedService without its methods: TypeError
 > GET /blob?case=blob
   get_blob(blob)
 < 200 application/octet-stream b'\x00\xff'
+> GET /texts?case=none
+  get_text(none)
+< 200 application/json null
+> GET /texts?case=null
+  get_text(null)
+< 200 application/json null
+< x-rate: 5
+> GET /texts?case=word
+  get_text(word)
+< 200 application/json "abc"

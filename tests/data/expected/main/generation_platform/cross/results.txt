@@ -90,3 +90,28 @@ post_empty
   post_empty(case='x')
   < 204 -
   = None
+get_text null result
+  > GET /texts?case=result
+  get_text(case='result')
+  < 200 application/json
+  = (Response(FieldTextsGetResponse(root=None), 200, 'application/json'), FieldTextsGetResponse200XRateHeader(root=5))
+get_text null result value
+  > GET /texts?case=result
+  get_text(case='result')
+  < 200 application/json
+  = FieldTextsGetResponse(root=None)
+get_text None
+  > GET /texts?case=none
+  get_text(case='none')
+  < 200 application/json
+  = Response(FieldTextsGetResponse(root=None), 200, 'application/json')
+get_text None value
+  > GET /texts?case=none
+  get_text(case='none')
+  < 200 application/json
+  = FieldTextsGetResponse(root=None)
+get_text value
+  > GET /texts?case=value
+  get_text(case='value')
+  < 200 application/json
+  = FieldTextsGetResponse(root='abc')

@@ -1,7 +1,8 @@
 """Call the results server through its client: statuses, ranges, `default`, typed errors, headers, and media types.
 
 The server answers each call's `case` with its primary value, an `HTTPResult` of another status, or a Starlette
-response of another media type; the client reports the value and status it decoded, or the error it raised.
+response of another media type; the client reports the value and status it decoded, or the error it raised. A text
+that may be null is answered as a result without a body, as a bare `None`, and as a value.
 """
 
 from __future__ import annotations
@@ -37,6 +38,11 @@ def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[s
         "problem": lambda: result(500, models.Problem(title="broken")),
     }
     plain = {"short": lambda: "abc", "long": lambda: "abcd"}
+    texts = {
+        "result": lambda: result(200, None, headers={"X-Rate": "5"}),
+        "none": lambda: None,
+        "value": lambda: models.FieldTextsGetResponse("abc"),
+    }
     return {
         "untagged": service(
             server.services.UntaggedService,
@@ -46,6 +52,7 @@ def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[s
             get_latin=lambda **_: "caf\u00e9",
             get_nothing=lambda case: result(200 if case == "ok" else 400, {"case": case}),
             get_blob=lambda case: case.encode() * 2,
+            get_text=lambda case: texts[case](),
         )
     }
 
@@ -56,6 +63,7 @@ def calls(kit: Kit) -> Calls:
     view = api.with_response
     once = kit.connect(max_retries=0).default
     header = kit.module("types.default").decode_get_result_header
+    rate = kit.module("types.default").decode_get_text_header
     return [
         ("get_result thing", lambda: view.get_result(case="thing")),
         (
@@ -86,4 +94,12 @@ def calls(kit: Kit) -> Calls:
         ("get_nothing error", lambda: api.get_nothing(case="bad")),
         ("get_blob", lambda: view.get_blob(case="ab")),
         ("post_empty", lambda: api.post_empty(case="x")),
+        (
+            "get_text null result",
+            lambda: kit.then(view.get_text(case="result"), lambda result: (result, rate(result.info, name="X-Rate"))),
+        ),
+        ("get_text null result value", lambda: api.get_text(case="result")),
+        ("get_text None", lambda: view.get_text(case="none")),
+        ("get_text None value", lambda: api.get_text(case="none")),
+        ("get_text value", lambda: api.get_text(case="value")),
     ]

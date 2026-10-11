@@ -1476,6 +1476,508 @@
       {
         "method": "GET",
         "url": "/blob?case=blob"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null",
+        "show_headers": [
+          "x-rate"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=word"
+      }
+    ],
+    "package_snapshots": []
+  },
+  "nullable-results": {
+    "input": "server-nullable-results.yaml",
+    "services": "results",
+    "backends": [
+      "pydantic_v2.BaseModel",
+      "pydantic_v2.dataclass"
+    ],
+    "config": {
+      "server_handler_modes": {
+        "/paths/~1lists/get": "async"
+      }
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/texts?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null",
+        "show_headers": [
+          "x-rate"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=long-word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-201"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=created",
+        "show_headers": [
+          "location"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-202"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-203"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-206"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=no-content"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-404"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-500"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-none"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-empty"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=bare"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=word"
+      }
+    ],
+    "package_snapshots": [
+      "pydantic_v2.BaseModel"
+    ]
+  },
+  "nullable-results-3-0": {
+    "input": "server-nullable-results-3-0.yaml",
+    "services": "results",
+    "backends": [
+      "pydantic_v2.BaseModel",
+      "pydantic_v2.dataclass"
+    ],
+    "config": {
+      "server_handler_modes": {
+        "/paths/~1lists/get": "async"
+      }
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/texts?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null",
+        "show_headers": [
+          "x-rate"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=long-word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-201"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=created",
+        "show_headers": [
+          "location"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-202"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-203"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-206"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=no-content"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-404"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-500"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-none"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-empty"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=bare"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=word"
+      }
+    ],
+    "package_snapshots": []
+  },
+  "nullable-results-alias": {
+    "input": "server-nullable-results.yaml",
+    "services": "results",
+    "config": {
+      "server_handler_modes": {
+        "/paths/~1lists/get": "async"
+      }
+    },
+    "model": {
+      "use_type_alias": true
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/texts?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null",
+        "show_headers": [
+          "x-rate"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=long-word"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-201"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=created",
+        "show_headers": [
+          "location"
+        ]
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-202"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-203"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-206"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=no-content"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-404"
+      },
+      {
+        "method": "GET",
+        "url": "/texts?case=null-500"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-none"
+      },
+      {
+        "method": "HEAD",
+        "url": "/texts?case=head-empty"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/lists?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/names?case=word"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/values?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/anything?case=numbers"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/pets?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/things?case=bare"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=none"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=missing-body"
+      },
+      {
+        "method": "GET",
+        "url": "/notes?case=word"
       }
     ],
     "package_snapshots": []

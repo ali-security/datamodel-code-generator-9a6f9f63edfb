@@ -25,7 +25,10 @@ _MIN_CONTENT_STATUS: Final = 200
 
 @dataclass(frozen=True, slots=True)
 class HTTPResult(Generic[BodyT_co]):
-    """Send one declared response: its status, an optional body of the declared type, and extra headers."""
+    """Send one declared response: its status, an optional body of the declared type, and extra headers.
+
+    Without a body, a response whose JSON accepts null sends `null`, and any other response sends none.
+    """
 
     status_code: int
     body: BodyT_co | None = None
@@ -36,6 +39,7 @@ class HTTPResult(Generic[BodyT_co]):
 class Declared:
     """One declared response: its default media type with that type's kind and charset, and the model its body takes.
 
+    `null` says the body is JSON of a type that accepts null, so the response sends None as `null` instead of no body.
     The model's adapter is built when the response first sends a body; a concurrent first send builds an equal one.
     """
 
@@ -43,6 +47,7 @@ class Declared:
     kind: Literal["json", "text", "form", "multipart", "binary"] = "json"
     charset: str = "utf-8"
     model: object = None
+    null: bool = False
     _adapter: TypeAdapter[object] | None = field(default=None, init=False, repr=False, compare=False)
 
     def adapter(self) -> TypeAdapter[object] | None:
@@ -92,7 +97,7 @@ def _is_result(value: object) -> TypeIs[HTTPResult[object]]:
 
 def _respond(status: int, body: object, headers: Mapping[str, str] | None, plan: OperationResponses) -> Response:
     declared = plan.find(status) or _UNDECLARED
-    if body is None or plan.head or status < _MIN_CONTENT_STATUS or status in _EMPTY_STATUSES:
+    if (body is None and not declared.null) or plan.head or status < _MIN_CONTENT_STATUS or status in _EMPTY_STATUSES:
         if inspect.isawaitable(body):
             raise _unawaited(body)
         return Response(status_code=status, headers=headers)

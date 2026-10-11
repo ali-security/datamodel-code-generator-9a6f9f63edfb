@@ -59,3 +59,14 @@ class FieldBlobGetResponse(RootModel[bytes]):
 
 
 FieldEmptyPostQueryCaseParameter = TypeAliasType("FieldEmptyPostQueryCaseParameter", str)
+
+
+FieldTextsGetQueryCaseParameter = TypeAliasType("FieldTextsGetQueryCaseParameter", str)
+
+
+class FieldTextsGetResponse(RootModel[constr(max_length=5) | None]):
+    root: constr(max_length=5) | None
+
+
+class FieldTextsGetResponse200XRateHeader(RootModel[int]):
+    root: int

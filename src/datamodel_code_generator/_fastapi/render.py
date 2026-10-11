@@ -998,6 +998,8 @@ def _responses_plan(module: Module, spec: OperationSpec) -> ResponsesPlan:
                 entries.append(f"charset={encoding!r}")
             if media.kind != "binary" and media.use is not None and media.use.type is not None:
                 entries.append(f"model={module.annotation(media.use.type)}")
+            if response.null:
+                entries.append("null=True")
         declared = module.local("_runtime.server.responses", "Declared")
         responses.append(f"{response.status!r}: {declared}({', '.join(entries)})")
     primary = spec.primary

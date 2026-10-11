@@ -1,7 +1,8 @@
-"""Services of the result server: each request's case names the value, result, or Response it returns."""
+"""Services of the result servers: each request's case names the value, result, or Response it returns."""
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING
 
 from starlette.responses import Response
@@ -12,7 +13,10 @@ if TYPE_CHECKING:
 
 
 def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[str, dict[str, object]]:
-    """Return a service whose results cover bare values, HTTP results, and Responses under each declared response."""
+    """Return a service whose results cover bare values, HTTP results, and Responses under each declared response.
+
+    It holds the methods of the results document and of the nullable results documents, one of those asynchronous.
+    """
     result = server.HTTPResult
     thing = models.Thing(id=1)
     results: dict[str, Callable[[], object]] = {
@@ -43,6 +47,11 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         "anything": lambda: result(200, models.FieldNothingGetResponse()),
         "none": lambda: None,
         "value": lambda: {"a": 1},
+        "null": lambda: result(200, None, {"X-Rate": "5"}),
+        "word": lambda: "abc",
+        "long-word": lambda: result(200, "too long"),
+        "numbers": lambda: [1, 2],
+        **{f"null-{status}": partial(result, status, None) for status in (201, 202, 203, 206, 404, 500)},
     }
 
     def respond(name: str, case: str) -> object:
@@ -70,5 +79,32 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
 
         def post_empty(self, *, case: str) -> object:
             return respond("post_empty", case)
+
+        def get_text(self, *, case: str) -> object:
+            return respond("get_text", case)
+
+        def head_text(self, *, case: str) -> object:
+            return respond("head_text", case)
+
+        async def get_list(self, *, case: str) -> object:
+            return respond("get_list", case)
+
+        def get_name(self, *, case: str) -> object:
+            return respond("get_name", case)
+
+        def get_value(self, *, case: str) -> object:
+            return respond("get_value", case)
+
+        def get_anything(self, *, case: str) -> object:
+            return respond("get_anything", case)
+
+        def get_pet(self, *, case: str) -> object:
+            return respond("get_pet", case)
+
+        def get_thing(self, *, case: str) -> object:
+            return respond("get_thing", case)
+
+        def get_note(self, *, case: str) -> object:
+            return respond("get_note", case)
 
     return {"default": {"untagged": Untagged()}}

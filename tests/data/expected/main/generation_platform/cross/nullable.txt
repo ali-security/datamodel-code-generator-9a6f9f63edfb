@@ -1,0 +1,92 @@
+models shared True
+# nullable in-process sync, in-process async
+get_text None
+  > GET /texts?case=none
+  get_text(case='none')
+  < 200 application/json
+  = Response(None, 200, 'application/json')
+get_text None value
+  > GET /texts?case=none
+  get_text(case='none')
+  < 200 application/json
+  = None
+get_text null result
+  > GET /texts?case=result
+  get_text(case='result')
+  < 200 application/json
+  = (Response(None, 200, 'application/json'), 5)
+get_text null result value
+  > GET /texts?case=result
+  get_text(case='result')
+  < 200 application/json
+  = None
+get_text value
+  > GET /texts?case=word
+  get_text(case='word')
+  < 200 application/json
+  = 'abc'
+get_text 201
+  > GET /texts?case=created
+  get_text(case='created')
+  < 201 application/json
+  = Response(None, 201, 'application/json')
+get_text 2XX
+  > GET /texts?case=partial
+  get_text(case='partial')
+  < 206 application/json
+  = Response(None, 206, 'application/json')
+get_text 4XX
+  > GET /texts?case=missing
+  get_text(case='missing')
+  < 404 application/json
+  ! NotFoundError: Error code: 404 - null [operation_id='getText', status_code=404, body=<Color.NoneType_None: None>, body_bytes=b'null', truncated=False]
+get_text default
+  > GET /texts?case=broken
+  get_text(case='broken')
+  < 500 application/problem+json
+  ! InternalServerError: Error code: 500 - null [operation_id='getText', status_code=500, body_bytes=b'null', truncated=False]
+head_text
+  > HEAD /texts?case=none
+  head_text(case='none')
+  < 200 -
+  = Response(None, 200, None)
+get_list None
+  > GET /lists?case=none
+  get_list(case='none')
+  < 200 application/json
+  = None
+get_list value
+  > GET /lists?case=numbers
+  get_list(case='numbers')
+  < 200 application/json
+  = [1, 2]
+get_name None
+  > GET /names?case=none
+  get_name(case='none')
+  < 200 application/json
+  = None
+get_value None
+  > GET /values?case=none
+  get_value(case='none')
+  < 200 application/json
+  = Response(None, 200, 'application/json')
+get_anything None
+  > GET /anything?case=none
+  get_anything(case='none')
+  < 200 application/json
+  = Response(None, 200, 'application/json')
+get_anything null result
+  > GET /anything?case=result
+  get_anything(case='result')
+  < 200 application/json
+  = None
+get_pet None
+  > GET /pets?case=none
+  get_pet(case='none')
+  < 200 application/vnd.pet+json
+  = Response(None, 200, 'application/vnd.pet+json')
+get_thing
+  > GET /things?case=thing
+  get_thing(case='thing')
+  < 200 application/json
+  = Thing(id=1)

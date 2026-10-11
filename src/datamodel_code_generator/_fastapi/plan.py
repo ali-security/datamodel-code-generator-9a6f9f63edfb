@@ -255,11 +255,12 @@ class BodySpec:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ResponseSpec:
-    """One declared response with its media."""
+    """One declared response with its media, and whether it sends None as the JSON null its default media accepts."""
 
     status: str
     declaration: WireDeclaration
     media: tuple[MediaSpec, ...]
+    null: bool = False
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -1211,7 +1212,10 @@ class Planner:  # noqa: PLR0904
         )
 
     def response(self, operation: OperationContract, declaration: WireDeclaration) -> ResponseSpec:
-        """Return one declared response with its media and effective headers."""
+        """Return one declared response with its media and effective headers.
+
+        A response whose default media is JSON of a type that accepts null sends None as null, as the models decide.
+        """
         media = tuple(self.media(child) for child in declaration.children if child.kind == "media")
         self.problems.extend(
             _problem(
@@ -1223,9 +1227,16 @@ class Planner:  # noqa: PLR0904
             if item.kind in {"form", "multipart"}
         )
         status = declaration.name or "default"
-        return ResponseSpec(
+        spec = ResponseSpec(
             status=status if status == "default" else status.upper(), declaration=declaration, media=media
         )
+        if (
+            (item := default_media(spec)) is not None
+            and item.kind == "json"
+            and self.takes_null(None if item.use is None else item.use.type)
+        ):
+            return replace(spec, null=True)
+        return spec
 
     def primary(self, operation: OperationContract, responses: tuple[ResponseSpec, ...]) -> PrimarySpec | None:
         """Choose the primary response and decide whether FastAPI's response_model sends bare values."""

@@ -11920,6 +11920,12 @@ validates and serializes with the declared response's model and default media ty
 sent as it is, for anything else, such as another media type or repeated headers. A `pydantic_v2.dataclass`
 cannot tell an omitted field from one set to `None`, so its responses send optional fields as `null`.
 
+A declared response whose default media type is JSON and whose model type accepts `null`, as for the request bodies
+above, sends `None` as the JSON body `null` with that media type: a bare `None` for the primary response, and an
+`HTTPResult` without a body or with `None` for an exact status, a range such as `2XX`, or `default`. Under any other
+response an `HTTPResult` without a body is an empty response without a `Content-Type`, as it always is for a HEAD
+operation and for the statuses `1XX`, `204`, `205`, and `304`.
+
 ## Security
 
 `security.py` declares one FastAPI dependency for each security scheme the selected operations use: `APIKeyHeader`,
