@@ -735,11 +735,10 @@ class Planner:
         parts: tuple[PartPlan, ...] = ()
         additional_part: PartPlan | None = None
         if reason is None and essence == _FORM_DATA and use is not None and use.schema is not None:
-            members, extra, parts = (
-                self._sent(use, use.schema, media_of=media_of, styles_of=styles_of)
-                if request
-                else (*self._received(use, use.schema), ())
-            )
+            if request:
+                members, extra, parts = self._sent(use, use.schema, media_of=media_of, styles_of=styles_of)
+            else:
+                members, extra = self._received(use, use.schema)
             if members is None:
                 encoded = tuple(styles_of.values())
                 self.problems.extend(
