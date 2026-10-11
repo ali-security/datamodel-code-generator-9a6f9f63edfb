@@ -570,6 +570,43 @@ def test_client_cli_generation_json(
 
 
 @pytest.mark.parametrize(
+    ("name", "arguments"),
+    [
+        ("target-2.14-missing", ["--target-pydantic-version", "2.14", "--use-missing-sentinel"]),
+        ("target-2.14", ["--target-pydantic-version", "2.14"]),
+        ("unset-target-missing", ["--use-missing-sentinel"]),
+    ],
+)
+def test_client_cli_pydantic_dependency(
+    name: str,
+    arguments: list[str],
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Print and document the pydantic requirement that the pydantic imports of the models need."""
+    monkeypatch.chdir(tmp_path)
+    run_main_and_assert(
+        input_path=Path("options.yaml"),
+        output_path=Path("models.py"),
+        input_file_type="openapi",
+        extra_args=[*OPTIONS, *CLIENT, *arguments],
+        copy_files=_inputs(tmp_path),
+        skip_code_validation=True,
+    )
+    models = Path("models.py").read_text(encoding="utf-8").splitlines(keepends=True)
+    readme = Path("client", "_generated_docs", "README.md").read_text(encoding="utf-8").splitlines(keepends=True)
+    assert_output(
+        "".join((
+            capsys.readouterr().err,
+            *(line for line in models if "MISSING" in line and "import" in line),
+            *(line for line in readme if "pydantic>=" in line),
+        )),
+        EXPECTED / "cli" / "pydantic-dependency" / f"{name}.txt",
+    )
+
+
+@pytest.mark.parametrize(
     ("arguments", "stderr"),
     [
         (["--watch", "--check"], "Error: --watch and --check cannot be used together\n"),
