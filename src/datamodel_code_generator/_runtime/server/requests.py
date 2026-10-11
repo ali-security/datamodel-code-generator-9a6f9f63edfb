@@ -195,7 +195,8 @@ class BodyMedia:
 
     def __post_init__(self) -> None:
         """Index the members of a multipart form by name once."""
-        object.__setattr__(self, "members", {item.name: item for item in (*self.fields, *self.json_parts)})
+        members: tuple[FieldPlan | JsonPart, ...] = (*self.fields, *self.json_parts)
+        object.__setattr__(self, "members", {item.name: item for item in members})
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
