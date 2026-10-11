@@ -66,6 +66,11 @@ get_header_text JSON content beyond Latin-1
   get_header_text(X_Name=None, X_Items=None, X_Label=None, X_Kind=None, X_Note=None, X_Named=Named(name='日本語'))
   < 204 -
   = None
+get_header_text JSON content with DEL
+  > GET /header-text
+  get_header_text(X_Name=None, X_Items=None, X_Label=None, X_Kind=None, X_Note=None, X_Named=Named(name='a\x7fb'))
+  < 204 -
+  = None
 get_header_text ASCII
   > GET /header-text
   get_header_text(X_Name='a\tb ~', X_Items=['a b', 'c'], X_Label=Named(name='a b'), X_Kind=FieldHeaderTextGetHeaderXKindParameter.plain, X_Note='a, b', X_Named=Named(name='a b'))

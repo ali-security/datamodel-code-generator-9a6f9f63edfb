@@ -911,7 +911,8 @@ when a next URL repeats it. A `null` is written as it is to a JSON body or a que
 targets that can carry it. A parameter target replaces the argument. A querystring or body target writes into the
 caller's querystring or JSON body, encoded and checked as in any call, or into an empty object when the call gives none;
 a missing, null, or other non-object value on its pointer is replaced by an empty object. The querystring is then
-encoded once, so no query pair is added. The values a server gave are never checked against their targets' schemas. A
+encoded once, so no query pair is added. The values a server gave are never checked against their targets' schemas;
+a header parameter still takes [header text](#model-codecs) only, as in any call. A
 call's `extra_headers` and `extra_query` must not name a header or a query parameter the helper writes: `iterate`,
 `page`, and `next_page` raise `ConfigurationError` with a `field_path` of `("options", "extra_headers" or
 "extra_query", <name>)` before sending. A binding
@@ -1883,8 +1884,8 @@ or does not fit the helper, such as a missing or extra member, an empty event ID
 reason="expired")`. The cursor and the bindings' values are written as a server's are: a saved dot segment for a path
 parameter raises `ProtocolDataError`, a value the reopen would send as a credential header or a security scheme's query
 field, including a property of an exploded form or deepObject query parameter, raises `ConfigurationError` with the
-reason `wrong_capability`, and one the request cannot encode, such as an event ID ending in a space, raises the
-request's `DecodeError`.
+reason `wrong_capability`, and one the request cannot encode, such as an event ID that ends in a space or is not
+ASCII, which a header cannot carry, raises the request's `DecodeError`.
 
 With `StreamOptions(reconnect=True)`, a stream that has delivered a cursor reopens itself within the same step after a
 read-phase transport failure the shared retry classification retries, or a read timeout the call's own `timeout`
@@ -1895,8 +1896,9 @@ retry options. Before a reopen the stream waits the retry backoff, and at least 
 in the session's deadline. When the backoff's cap or that `retry` time is longer than `max_reconnect_wait`, whatever the
 jitter draws below the cap, or the wait is not shorter than the session's remaining time, the wait is not begun and the
 interruption is raised. Running out of reconnections raises `SessionLimitError` with the reason `reconnects`,
-never a normal end. A cursor a reconnection cannot encode raises `ProtocolDataError` with the reason `value` and the
-cursor's selector, or for an event ID the target it is written to, as `location`, with the interruption as its context,
+never a normal end. A cursor a reconnection cannot encode, such as an event ID that is not ASCII, raises
+`ProtocolDataError` with the reason `value` and the cursor's selector, or for an event ID the target it is written
+to, as `location`, with the interruption as its context,
 and a value it would send as a credential raises `ConfigurationError` with the reason `wrong_capability`. A decode,
 size, remote, idle, or deadline failure, the declared end, a reopen answered with an error, and closing never reconnect.
 Events the server sends again after a reopen are delivered again, numbered on: nothing removes duplicates. Every open
@@ -2330,7 +2332,10 @@ A stale entry is revalidated with its validator as `validator` declares; a fetch
 header's name as `field_path` before sending when a usable entry has another validator or the header is given more than
 once. A 304 updates the entry's headers, except `Content-Type`, `Content-Encoding`, `Content-Length`, and hop-by-hop
 fields, and its freshness. A 304 without a usable entry, after a redirect, or with an `ETag` or `Last-Modified` other
-than the entry's raises `ProtocolDataError` with the reason `inconsistent`; no request is sent again.
+than the entry's raises `ProtocolDataError` with the reason `inconsistent`; no request is sent again. A validator
+that is not [header text](#model-codecs), such as an entity tag with non-ASCII text, is never sent back, since no
+client can write it as every server reads it: it counts as no validator, so its entry is fetched again without a
+condition, and a response that is not fresh is not stored for it.
 
 ### Storing and keys
 
@@ -2355,7 +2360,8 @@ authenticated and an anonymous one a helper declared anonymous; anything else ra
 reason `binding_mismatch`. Credentials a request does not carry, such as a client certificate or an authenticating
 transport, are not in the key: give such a client a store of its own.
 Freshness comes from `max-age` or `Expires` only, capped by `max_ttl`; a stale entry is revalidated with its validator,
-and a 304 without a usable entry raises `ProtocolDataError`. A response is stored only when its status is cacheable, it
+and a 304 without a usable entry raises `ProtocolDataError`. A validator a header cannot carry as ASCII text is never
+sent, and its entry is fetched again without it. A response is stored only when its status is cacheable, it
 came without a redirect, Set-Cookie, `no-store`, or an unsupported Cache-Control directive, and its `Vary` names only
 allowlisted headers; otherwise it removes the entry it supersedes. Store failures raise `SDKError` with the reason
 `store_failed` and never resend a request.
@@ -2885,16 +2891,18 @@ unknown keys and leaves out absent ones; a dataclass drops unknown keys and leav
   whose encoded text is non-empty, with a `ParameterEncodingError` cause, before anything is sent: URL normalization in
   clients, proxies, and servers would remove the segment and send the call to another resource, and encoding the dots
   does not prevent it. `...` and `.a` are sent as they are, and a dot segment the path template spells is not refused.
-- **Header values.** A header carries HTAB, SP, and visible ASCII only, the text every HTTP client and server reads
-  alike: RFC 9110 leaves any other byte opaque, and servers read it as Latin-1 or as UTF-8. A header parameter of any
-  style, or of text content, whose value, array item, or object member holds other text, such as `café`, a control
-  character, or whitespace at either end, fails with a request `DecodeError` of the reason `unencodable`, with a
-  `ParameterEncodingError` cause, before anything is sent, instead of arriving as other text. A header parameter of
-  JSON content is written with its non-ASCII text escaped, so it carries any text; declare the header that way, or
-  apply an encoding the API defines yourself, such as percent-encoding, Base64, or RFC 8187, and decode it in the
-  service. The headers of `default_headers` and `extra_headers` and an `idempotency_key` follow the same rule; see
-  [timeouts and cancellation](#timeouts-and-cancellation). A response header's text is what HTTPX2 decodes: ASCII,
-  else UTF-8 when every header of the response is UTF-8, else Latin-1, which is how the generated server writes it.
+- **Header values.** A header carries header text only: HTAB, SP, and visible ASCII, without whitespace at either
+  end, the text every HTTP client and server reads alike. RFC 9110 leaves any other byte opaque, and servers read it
+  as Latin-1 or as UTF-8. A header parameter of any style, or of text content, whose value, array item, or object
+  member is any other text, such as `café` or one with a control character, fails with a request `DecodeError` of the
+  reason `unencodable`, with a `ParameterEncodingError` cause, before anything is sent, instead of arriving as other
+  text. A header parameter of JSON content is written with its non-ASCII text and DEL escaped, so it carries any text;
+  declare the header that way, or apply an encoding the API defines yourself, such as percent-encoding, Base64, or
+  RFC 8187, and decode it in the service. The headers of `default_headers` and `extra_headers` and an
+  `idempotency_key` follow the same rule; see [timeouts and cancellation](#timeouts-and-cancellation). A value a
+  server gave that a protocol helper writes to a header parameter, such as an event ID, a cursor, or a binding's
+  value, follows it too. A response header's text is what HTTPX2 decodes: ASCII, else UTF-8 when every header of the
+  response is UTF-8, else Latin-1, which is how the generated server writes it.
 - **Cookies.** A cookie parameter with a single value is sent as it is, without percent-encoding, which is how HTTP
   clients send cookies and how the generated server reads them. A cookie cannot carry `;`, `,`, `"`, `\`,
   whitespace, control characters, or non-ASCII text (RFC 6265), so such a value fails with a request `DecodeError`
@@ -2944,9 +2952,10 @@ each name they list their value over the generated headers and query, the client
 parameters', and the call's extra ones last; None removes that name. Header names compare case-insensitively, query
 names exactly. A body's media type ranks above every layer but the call's `extra_headers`: only a call's Content-Type
 relabels its body, or with None sends it unlabelled, and a multipart one without `boundary=` keeps the body's boundary.
-A header's name is an HTTP token and its value HTAB, SP, and visible ASCII, or None: for any other, such as a value
-with a line break or `café`, `Client(...)`, `with_options(...)`, and `RequestOptions(...)` raise `ConfigurationError`
-with the reason `invalid_value` and the `field_path` `("headers", name)`, so nothing is sent.
+A header's name is an HTTP token and its value [header text](#model-codecs), HTAB, SP, and visible ASCII without
+whitespace at either end, or None: for any other, such as a value with a line break, `café`, or a space at its end,
+`Client(...)`, `with_options(...)`, and `RequestOptions(...)` raise `ConfigurationError` with the reason
+`invalid_value` and the `field_path` `("headers", name)`, so nothing is sent.
 
 | Setting | Effective default | Meaning |
 |---|---|---|
@@ -3310,10 +3319,10 @@ before sending with `ConfigurationError` and the reason `not_declared`. A header
 `extra_headers` or the client's or a view's `default_headers` is sent as it is and is the call's key instead, the same
 on every call it reaches; a protocol helper, which needs a key per request, refuses it. The same key is sent unchanged on every eligible
 retry. A declaration without an active key does not authorize unsafe retries. The contract does not guarantee
-exactly-once business execution. A key is HTAB, SP, and visible ASCII: for any other text, such as `clé` or a line
-break, `RequestOptions(idempotency_key=...)` raises `ConfigurationError` with the reason `invalid_value` and the
-`field_path` `("idempotency_key",)`. HTTPX2 refuses a key that is still not a valid header value, such as one ending in
-a space, when it sends the request.
+exactly-once business execution. A key is [header text](#model-codecs), HTAB, SP, and visible ASCII without
+whitespace at either end: for any other value, such as `clé`, a line break, a space at its end, or a number,
+`RequestOptions(idempotency_key=...)` raises `ConfigurationError` with the reason `invalid_value` and the
+`field_path` `("idempotency_key",)`.
 
 ```python
 from pets import Client

@@ -276,6 +276,14 @@
   > GET https://api.example.com/users/7
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, x-hooked: yes] b''
   header a request hook adds again = network 7:hooked again status=200 network=200 attempts=1 type=application/json request_id=None headers=[('cache-control', 'private, max-age=60'), ('content-length', '30'), ('content-type', 'application/json')]
+  > GET https://api.example.com/secure/users/9
+    [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, x-sig: café] b''
+  Latin-1 bytes an Auth adds = network 9:latin-1 status=200 network=200 attempts=1 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('content-length', '25'), ('content-type', 'application/json')]
+  the same bytes again = fresh_cache 9:latin-1 status=200 network=None attempts=0 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('content-type', 'application/json'), ('Content-Length', '25')]
+  > GET https://api.example.com/secure/users/9
+    [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json, x-sig: café] b''
+  UTF-8 bytes of the same text = network 9:utf-8 status=200 network=200 attempts=1 type=application/json request_id=None headers=[('cache-control', 'max-age=60'), ('content-length', '23'), ('content-type', 'application/json')]
+  header name beyond ASCII an Auth adds ! APIConnectionError: APIConnectionError(operation_id='getSecureUser', cause='LocalProtocolError') [operation_id='getSecureUser', cause=LocalProtocolError("Illegal header name b'X-S\\xefg'")]
     get key=32
   > GET https://api.example.com/users/24
     [host: api.example.com, accept-encoding: gzip, deflate, accept: application/json] b''

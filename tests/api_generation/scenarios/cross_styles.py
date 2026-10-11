@@ -71,6 +71,7 @@ def calls(kit: Kit) -> Calls:
             "get_header_text JSON content beyond Latin-1",
             lambda: text(X_Named=models.Named(name="\u65e5\u672c\u8a9e")),
         ),
+        ("get_header_text JSON content with DEL", lambda: text(X_Named=models.Named(name="a\x7fb"))),
         (
             "get_header_text ASCII",
             lambda: text(

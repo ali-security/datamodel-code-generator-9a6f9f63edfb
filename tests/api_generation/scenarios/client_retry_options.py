@@ -364,6 +364,8 @@ def _key_calls(package: ModuleType, options: ModuleType, lines: list[str]) -> No
             "explicit undeclared key",
             lambda: api.retry.get_safe(options=options.RequestOptions(idempotency_key="unbound")),
         )
+        for value in (" k ", "\tk", 5, b"k"):
+            record(lines, f"refused key {value!r}", lambda value=value: options.RequestOptions(idempotency_key=value))
     lines.append(
         f"  automatic keys count={len(observed)} same retry={observed[0] == observed[1]}"
         f" fresh call={observed[1] != observed[2]} suppressed={observed[3] is None}"

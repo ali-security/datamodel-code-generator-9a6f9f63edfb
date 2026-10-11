@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Final, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import httpx2
 
@@ -15,9 +15,6 @@ if TYPE_CHECKING:
 
     from .responses import ResponseInfo
     from .timing import ResolvedTimeoutOptions
-
-
-_OPAQUE: Final = "surrogateescape"
 
 
 def native_timeout(phases: ResolvedTimeoutOptions) -> dict[str, float | None]:
@@ -56,18 +53,18 @@ def transport_retry_reason(
 def request_fields(request: httpx2.Request) -> list[tuple[str, str]]:
     """Return a native request's header fields in the case they are sent, decoded as the SDK encoded them.
 
-    A byte that is not ASCII, which only an Auth, an event hook, or a server's validator adds, stays opaque.
+    The SDK writes ASCII only; a byte an Auth or an event hook added reads as its Latin-1 character.
     """
-    return [(name.decode("ascii", _OPAQUE), value.decode("ascii", _OPAQUE)) for name, value in request.headers.raw]
+    return [(name.decode("latin-1"), value.decode("latin-1")) for name, value in request.headers.raw]
 
 
 def wire_fields(fields: Collection[tuple[str, str]]) -> list[tuple[bytes, bytes]]:
     """Encode header fields as ASCII, refusing any other text before it is sent, with the header as the field path.
 
-    The bytes `request_fields` left opaque are written back unchanged, and the error keeps no value.
+    The error keeps no value.
     """
     try:
-        return [(name.encode("ascii", _OPAQUE), value.encode("ascii", _OPAQUE)) for name, value in fields]
+        return [(name.encode("ascii"), value.encode("ascii")) for name, value in fields]
     except UnicodeEncodeError as error:
         unsent = next(name for name, value in fields if error.object in {name, value})
         raise ConfigurationError(field_path=("headers", unsent), reason="invalid_value") from None

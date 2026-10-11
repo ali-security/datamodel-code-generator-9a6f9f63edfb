@@ -35,7 +35,7 @@ model_codecs/stdlib.py: .media, __future__, base64, collections.abc, dataclasses
 model_codecs/unset.py: __future__, typing_extensions
 protocols/__init__.py: -
 protocols/adapters.py: ..client.errors, .webhook_events, .webhooks, __future__, collections.abc, dataclasses, datetime, types, typing, typing_extensions
-protocols/cache.py: ..client.errors, ..client.media, ..client.native, ..client.operations, ..client.options, ..client.responses, ..client.retry, .cache_stores, .caches, .client, .errors, .options, .records, .references, __future__, collections.abc, dataclasses, datetime, hashlib, httpx2, re, typing, typing_extensions
+protocols/cache.py: ..client.errors, ..client.media, ..client.native, ..client.operations, ..client.options, ..client.responses, ..client.retry, ..model_codecs.parameters, .cache_stores, .caches, .client, .errors, .options, .records, .references, __future__, collections.abc, dataclasses, datetime, hashlib, httpx2, re, typing, typing_extensions
 protocols/cache_stores.py: ..client.errors, ..client.timing, .caches, __future__, collections, threading
 protocols/caches.py: ..client.responses, __future__, dataclasses, datetime, math, typing, typing_extensions
 protocols/client.py: ..client.client, ..client.errors, ..client.logical, ..client.native, ..client.operations, ..client.options, ..client.positions, ..client.raw, ..client.responses, ..client.retry, ..client.timing, ..client.urls, ..model_codecs.media, ..model_codecs.unset, .options, __future__, collections.abc, dataclasses, functools, httpx2, typing, urllib.parse

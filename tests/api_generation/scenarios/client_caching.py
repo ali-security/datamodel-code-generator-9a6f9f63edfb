@@ -375,9 +375,11 @@ def _revalidated(cache: Caching, api: Any, exchange: Exchange, lines: list[str])
     fetched(lines, "aged revalidated by a 304 without Age", lambda: helper.fetch(userId=aged))
     fetched(lines, "fresh after the 304", lambda: helper.fetch(userId=aged))
     named, tag = cache.user_id(26), {"etag": '"caf\u00e9"'.encode()}
-    exchange.respond(user(26, **tag, **{"cache-control": "max-age=0"}), not_modified(**tag))
-    fetched(lines, "validator beyond ASCII stored", lambda: helper.fetch(userId=named))
-    fetched(lines, "validator beyond ASCII sent in UTF-8, as it was read", lambda: helper.fetch(userId=named))
+    stale, checked = {"cache-control": "max-age=0"}, {"cache-control": "max-age=60, no-cache"}
+    exchange.respond(user(26, **tag, **stale), user(26, **tag, **checked), user(26, "dog", **tag, **checked))
+    fetched(lines, "stale with a validator beyond ASCII, not stored", lambda: helper.fetch(userId=named))
+    fetched(lines, "no-cache with a validator beyond ASCII, stored", lambda: helper.fetch(userId=named))
+    fetched(lines, "fetched again without the validator", lambda: helper.fetch(userId=named))
 
 
 def _vary(cache: Caching, api: Any, exchange: Exchange, lines: list[str]) -> None:
@@ -574,6 +576,35 @@ class _Bearer(httpx2.Auth):
         yield request
 
 
+class _Signed(httpx2.Auth):
+    """A caller's own native Auth adding one header field of its own bytes."""
+
+    def __init__(self, name: bytes, value: bytes) -> None:
+        self.field = (name, value)
+
+    def auth_flow(self, request: httpx2.Request) -> Generator[httpx2.Request, httpx2.Response, None]:
+        request.headers = httpx2.Headers([*request.headers.raw, self.field])
+        yield request
+
+
+def _signed(cache: Caching, native: Any, exchange: Exchange, lines: list[str]) -> None:
+    """Key entries by the bytes an Auth adds, whatever text they read as; a name HTTPX2 cannot send fails natively."""
+    package, options = cache.package, cache.options
+    nine = argument(package, "getSecureUser", "path", "userId", 9)
+    fresh = {"cache-control": "max-age=60"}
+    exchange.respond(user(9, "latin-1", **fresh), user(9, "utf-8", **fresh))
+    store = cache.protocols.MemoryCacheStore()
+    with package.Client(http_client=native, cache_stores={"secure.profile": store}, bearer="token") as api:
+        for label, name, value in (
+            ("Latin-1 bytes an Auth adds", b"X-Sig", "caf\u00e9".encode("latin-1")),
+            ("the same bytes again", b"X-Sig", "caf\u00e9".encode("latin-1")),
+            ("UTF-8 bytes of the same text", b"X-Sig", "caf\u00e9".encode()),
+            ("header name beyond ASCII an Auth adds", "X-S\u00efg".encode("latin-1"), b"a"),
+        ):
+            signed = options.RequestOptions(auth=_Signed(name, value))
+            fetched(lines, label, lambda signed=signed: api.protocols.secure.profile.fetch(userId=nine, options=signed))
+
+
 def cache_stores(package: ModuleType, lines: list[str]) -> None:
     """Drive the store contract, memory stores, store failures, credentials, records, and client settings."""
     cache = Caching(package)
@@ -586,6 +617,7 @@ def cache_stores(package: ModuleType, lines: list[str]) -> None:
         _recorded(cache, native, exchange, lines)
         _credentials(cache, native, exchange, lines)
         _rounds(cache, native, exchange, lines)
+        _signed(cache, native, exchange, lines)
     run(lambda: _async_stores(cache, lines))
 
 

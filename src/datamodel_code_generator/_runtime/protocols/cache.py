@@ -18,10 +18,11 @@ from typing_extensions import TypeVar
 
 from ..client.errors import ConfigurationError, SDKError, add_secondary
 from ..client.media import normalized
-from ..client.native import request_fields
+from ..client.native import request_fields, wire_fields
 from ..client.options import RequestOptions
 from ..client.responses import HeadersView, Response, ResponseInfo
 from ..client.retry import http_timestamp
+from ..model_codecs.parameters import header_text
 from .cache_stores import AsyncMemoryCacheStore, MemoryCacheStore
 from .caches import CacheEntry, CacheResult, CacheSource
 from .client import stored_value
@@ -337,10 +338,7 @@ class _Fetch(Generic[T]):
         )
 
     def conditional(self, entry: CacheEntry | None) -> httpx2.Request:
-        """Return the request to send, adding the validator of a usable stale entry the caller did not give.
-
-        The validator is a server's text, not a caller's, so one that is not ASCII is sent in UTF-8, as it was read.
-        """
+        """Return the request to send, adding the validator of a usable stale entry the caller did not give."""
         request = self.request
         self.requested_at = self.clock.time()
         validator = None if entry is None else _validator(self.plan, entry.headers)
@@ -349,7 +347,7 @@ class _Fetch(Generic[T]):
         self.sending = httpx2.Request(
             request.method,
             request.url,
-            headers=[*request.headers.raw, (validator[0].encode("ascii"), validator[1].encode())],
+            headers=wire_fields((*request_fields(request), validator)),
             content=request.content,
             extensions=dict(request.extensions),
         )
@@ -474,9 +472,13 @@ def _validates(stored: HeadersView, update: HeadersView) -> bool:
 
 
 def _validator(plan: CachePlan[T], headers: HeadersView) -> tuple[str, str] | None:
-    """Return the validator header that revalidates a representation as the helper declares, or None."""
+    """Return the validator header that revalidates a representation as the helper declares, or None.
+
+    A validator that is not header text, such as an entity tag beyond ASCII, counts as none: no client can send it
+    back as every server reads it, so its representation is fetched again instead.
+    """
     for (header, stored), kind in zip(_VALIDATORS, ("etag", "last_modified"), strict=True):
-        if plan.validator in {kind, "both"} and (value := headers.get(stored)) is not None:
+        if plan.validator in {kind, "both"} and (value := headers.get(stored)) is not None and header_text(value):
             return header, value
     return None
 

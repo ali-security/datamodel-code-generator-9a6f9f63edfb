@@ -41,6 +41,8 @@ _REFUSED_TEXTS: Final = (
     ("lone surrogate", "x\ud800"),
     ("on two lines", "a\r\nX-Injected: 1"),
     ("NUL", "a\x00b"),
+    ("ending in a space", "a "),
+    ("starting with HTAB", "\ta"),
 )
 
 
@@ -64,6 +66,7 @@ def headers(package: ModuleType, lines: list[str]) -> None:
             _parts(labeled, api, exchange, lines, options, bodies)
     http.close()
     _texts(package, lines, options)
+    _hook_bytes(package, lines, options)
     _unsendable(package, lines, options)
     run(lambda: _async_headers(package, lines))
     lines[:] = [_BOUNDARY.sub("<boundary>", line).replace("\t", "<HTAB>") for line in lines]
@@ -227,14 +230,40 @@ def _texts(package: ModuleType, lines: list[str], options: ModuleType) -> None:
         record(lines, "view header non-ASCII", lambda: api.with_options(default_headers=_NON_ASCII))
 
 
+def _signed(request: httpx2.Request) -> None:
+    request.headers = httpx2.Headers([*request.headers.raw, (b"X-Sig", "caf\u00e9".encode("latin-1"))])
+
+
+def _hook_bytes(package: ModuleType, lines: list[str], options: ModuleType) -> None:
+    """Send the bytes an event hook adds on each attempt of a retried call, as HTTPX2 holds them."""
+    pet = argument(package, "getPet", "path", "petId", 3)
+    exchange = Exchange(lines)
+    exchange.respond(raw_response(503, b"busy", "text/plain"), json_response(200, {"id": 3, "name": "fox"}))
+    retry = options.RetryOptions(initial_delay=0, max_delay=0, jitter="none")
+    with (
+        exchange.client(event_hooks={"request": [_signed]}) as http,
+        package.Client(http_client=http, retry=retry) as api,
+    ):
+        record(lines, "event hook's Latin-1 bytes on a retried call", lambda: api.pets.get_pet(petId=pet))
+
+
+def _split(request: httpx2.Request) -> None:
+    request.headers["X-A"] = "a\r\nb"
+
+
 def _unsendable(package: ModuleType, lines: list[str], options: ModuleType) -> None:
-    """Fail natively when HTTPX2 cannot send a header value, without waiting to retry the call."""
+    """Fail natively when HTTPX2 cannot send a header value, without waiting to retry the call.
+
+    The client refuses such a value of its own settings, so only the HTTP client's event hook or Auth can add one.
+    """
     pet = argument(package, "getPet", "path", "petId", 3)
     exchange, waits = Exchange(lines), []
-    padded = options.RequestOptions(extra_headers={"X-A": "a "})
-    with exchange.client() as http, package.Client(http_client=http, clock=options.Clock(sleep=waits.append)) as api:
-        record(lines, "header value ending in a space", lambda: api.pets.get_pet(petId=pet, options=padded))
-    lines.append(f"  header value ending in a space retry waits {waits}")
+    with (
+        exchange.client(event_hooks={"request": [_split]}) as http,
+        package.Client(http_client=http, clock=options.Clock(sleep=waits.append)) as api,
+    ):
+        record(lines, "event hook's header value on two lines", lambda: api.pets.get_pet(petId=pet))
+    lines.append(f"  event hook's header value on two lines retry waits {waits}")
 
 
 async def _async_headers(package: ModuleType, lines: list[str]) -> None:
