@@ -100,5 +100,10 @@ def calls(kit: Kit) -> Calls:
         ("post_check", lambda: api.post_check(body=models.Check(code=7, scores=[1, 2]))),
         ("post_note null", lambda: api.post_note(body=models.FieldNotesPostRequest(None))),
         ("post_note item", lambda: api.post_note(body=models.FieldNotesPostRequest(models.Item(name="i")))),
+        ("post_label null", lambda: api.post_label(body=models.FieldLabelsPostRequest(None))),
+        ("post_label text", lambda: api.post_label(body=models.FieldLabelsPostRequest("a"))),
+        ("post_label None", lambda: api.post_label(body=None)),
+        ("post_label refused", lambda: api.post_label(body=models.FieldLabelsPostRequest.model_construct("too long"))),
+        ("post_account None", lambda: api.post_account(body=None)),
         ("post_raw", lambda: api.post_raw(body=models.FieldRawPostRequest())),
     ]

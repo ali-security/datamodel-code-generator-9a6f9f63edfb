@@ -1,6 +1,6 @@
 # bodies
 serve pydantic_v2.BaseModel
-service UntaggedService: post_account, post_check, post_form, post_item, post_native_form, post_note, post_profile, post_raw, post_variant, put_archive, put_blob, put_document, search, upload
+service UntaggedService: post_account, post_check, post_form, post_item, post_label, post_native_form, post_note, post_profile, post_raw, post_variant, put_archive, put_blob, put_document, search, upload
 service UntaggedService without its methods: TypeError
 > POST /items
   post_item(body=None)
@@ -112,6 +112,18 @@ service UntaggedService without its methods: TypeError
 > POST /notes
   post_note(body=FieldNotesPostRequest(root=Item(name='a')))
 < 204 - b''
+> POST /labels
+  post_label(body=FieldLabelsPostRequest(root=None))
+< 204 - b''
+> POST /labels
+  post_label(body=FieldLabelsPostRequest(root='a'))
+< 204 - b''
+> POST /labels
+< 422 application/json [{"type": "missing", "loc": ["body"]}]
+> POST /labels
+< 422 application/json [{"type": "missing", "loc": ["body"]}]
+> POST /labels
+< 422 application/json [{"type": "string_too_long", "loc": ["body"]}]
 > POST /raw
   post_raw(request=POST /raw, body=b'{"any":"thing"}')
 < 204 - b''

@@ -109,5 +109,9 @@ class FieldNotesPostRequest(RootModel[Item | None]):
     root: Item | None
 
 
+class FieldLabelsPostRequest(RootModel[constr(max_length=5) | None]):
+    root: constr(max_length=5) | None
+
+
 class FieldRawPostRequest(BaseModel):
     pass

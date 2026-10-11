@@ -43,7 +43,7 @@ from datamodel_code_generator._target_contract import (
 from datamodel_code_generator._target_naming import NameScope, explicit_name, operation_basis
 from datamodel_code_generator._url_redaction import redact_reference
 from datamodel_code_generator.enums import DataModelType
-from datamodel_code_generator.imports import Import
+from datamodel_code_generator.imports import IMPORT_ANY, Import
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -1065,7 +1065,11 @@ class Planner:  # noqa: PLR0904
             yield "examples", examples
 
     def body(self, operation: OperationContract, declaration: WireDeclaration) -> BodySpec:
-        """Decide how the server receives a request body: FastAPI reads one JSON or URL-encoded model natively."""
+        """Decide how the server receives a request body: FastAPI reads one JSON or URL-encoded model natively.
+
+        FastAPI takes the JSON null of a required body for an omitted one, so an adapter reads a required JSON body
+        whose type accepts null.
+        """
         media = tuple(self.media(child) for child in declaration.children if child.kind == "media")
         for item in media:
             self.bound(item.use)
@@ -1083,6 +1087,8 @@ class Planner:  # noqa: PLR0904
             return spec if form is None else replace(spec, form_fields=self.form_plans(form)[0])
         item = media[0]
         match item.kind:
+            case "json" if spec.required and self.takes_null(None if item.use is None else item.use.type):
+                return spec
             case "json":
                 return replace(spec, decision=Decision(transport="fastapi_native"))
             case "form" | "multipart":
@@ -1090,6 +1096,30 @@ class Planner:  # noqa: PLR0904
             case _:
                 pass
         return spec
+
+    def takes_null(self, value: TypeView | None, seen: frozenset[SymbolId] = frozenset()) -> bool:
+        """Return whether a type validates JSON null, as the generated models annotate it.
+
+        Any value does without a type or as Any; so does None, an enum with a null value, a union with such a member,
+        and a root model or alias whose annotation accepts None or whose type does.
+        """
+        match value:
+            case None | NoneType():
+                return True
+            case ImportedType():
+                return value.import_ == IMPORT_ANY
+            case UnionType():
+                return any(self.takes_null(member, seen) for member in value.members)
+            case GeneratedSymbolType() if self.symbols[value.symbol].kind == "enum":
+                return "null" in self.symbols[value.symbol].value_types
+            case GeneratedSymbolType() if (
+                value.symbol not in seen and self.symbols[value.symbol].kind in _WRAPPERS and value.symbol in self.facts
+            ):
+                facts = self.facts[value.symbol]
+                return facts.annotation_null or self.takes_null(facts.type, seen | {value.symbol})
+            case _:
+                pass
+        return False
 
     def unsupported(self, operation: OperationContract, media: Iterable[MediaSpec], encoding: str = "") -> None:
         """Report request media that only the request body mode reads."""

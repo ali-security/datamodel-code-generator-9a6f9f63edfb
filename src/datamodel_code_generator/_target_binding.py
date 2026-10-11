@@ -1883,6 +1883,7 @@ def _field_facts(
             context.preexisting_null is True
             or (context.preexisting_null is False and context.explicit_nullable and null_in_annotation)
         ),
+        null_in_annotation,
     )
 
 

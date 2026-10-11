@@ -1,4 +1,4 @@
-"""Services of the request body server: they report the decoded bodies they receive."""
+"""Services of the request body servers: they report the decoded bodies they receive, null included."""
 
 from __future__ import annotations
 
@@ -9,7 +9,10 @@ if TYPE_CHECKING:
 
 
 def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[str, dict[str, object]]:
-    """Return a service that records its keywords, reading raw requests to their bytes."""
+    """Return a service that records its keywords, reading raw requests to their bytes.
+
+    It holds the methods of the bodies document and of the nullable body documents, one of those asynchronous.
+    """
 
     def record(name: str, arguments: dict[str, object]) -> None:
         calls.append(f"{name}({', '.join(f'{key}={value!r}' for key, value in arguments.items())})")
@@ -47,6 +50,39 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
 
         def post_note(self, **arguments: object) -> None:
             record("post_note", arguments)
+
+        def post_label(self, **arguments: object) -> None:
+            record("post_label", arguments)
+
+        def post_text(self, **arguments: object) -> None:
+            record("post_text", arguments)
+
+        async def post_list(self, **arguments: object) -> None:
+            record("post_list", arguments)
+
+        def post_choice(self, **arguments: object) -> None:
+            record("post_choice", arguments)
+
+        def post_color(self, **arguments: object) -> None:
+            record("post_color", arguments)
+
+        def post_name(self, **arguments: object) -> None:
+            record("post_name", arguments)
+
+        def post_pet(self, **arguments: object) -> None:
+            record("post_pet", arguments)
+
+        def post_value(self, **arguments: object) -> None:
+            record("post_value", arguments)
+
+        def post_anything(self, **arguments: object) -> None:
+            record("post_anything", arguments)
+
+        def post_id(self, **arguments: object) -> None:
+            record("post_id", arguments)
+
+        def post_draft(self, **arguments: object) -> None:
+            record("post_draft", arguments)
 
         def upload(self, **arguments: object) -> None:
             record("upload", arguments)

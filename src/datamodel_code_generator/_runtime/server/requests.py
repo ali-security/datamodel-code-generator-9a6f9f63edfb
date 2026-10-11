@@ -221,7 +221,10 @@ class BodyAdapter:
         return (await self.receive(request))[1]
 
     async def receive(self, request: Request) -> tuple[str | None, object]:
-        """Return the received media type with the validated body, or None for both of an omitted optional body."""
+        """Return the received media type with the validated body, or None for both of an omitted optional body.
+
+        An empty body is omitted when it names no media type or names JSON, which is never empty.
+        """
         header = request.headers.get("content-type")
         body = await request.body()
         if not body and (header is None or not self.required):
@@ -231,6 +234,8 @@ class BodyAdapter:
         if (selected := self._select(header)) is None:
             raise unsupported_media()
         media, media_type, received_type = selected
+        if not body and media.kind == "json":
+            raise RequestValidationError([missing(("body",))])
         try:
             return media_type, await _read(media, received_type, body, request)
         except MalformedError as error:

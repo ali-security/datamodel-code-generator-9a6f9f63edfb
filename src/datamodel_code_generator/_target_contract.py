@@ -313,7 +313,8 @@ class ModelFieldFacts:
     """Keep adopted model semantics separate from each original wire occurrence.
 
     `schema_null` says the None the field's annotation accepts comes from its schema's nullability or its own type,
-    rather than from an optional fallback or the model configuration.
+    rather than from an optional fallback or the model configuration. `annotation_null` says the emitted annotation
+    accepts None at all, whether its type holds None or the field adds it.
     """
 
     required: bool
@@ -325,6 +326,7 @@ class ModelFieldFacts:
     type: TypeView
     backend: BackendFieldFacts
     schema_null: bool
+    annotation_null: bool
 
 
 @dataclass(frozen=True, slots=True)

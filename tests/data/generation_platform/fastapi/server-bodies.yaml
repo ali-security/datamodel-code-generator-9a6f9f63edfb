@@ -160,6 +160,16 @@ paths:
             schema: {anyOf: [{$ref: "#/components/schemas/Item"}, {type: "null"}]}
       responses:
         "204": {description: Done.}
+  /labels:
+    post:
+      operationId: postLabel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: [string, "null"], maxLength: 5}
+      responses:
+        "204": {description: Done.}
   /raw:
     post:
       operationId: postRaw
