@@ -22,7 +22,7 @@ CLIENT = {"default_base_url": "https://bodies.example.com"}
 def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[str, object]:
     """Return a service whose every method records the body it received."""
     del models
-    return {"untagged": service(server.services.UntaggedService, record)}
+    return {"default": service(server.services.DefaultService, record)}
 
 
 def calls(kit: Kit) -> Calls:

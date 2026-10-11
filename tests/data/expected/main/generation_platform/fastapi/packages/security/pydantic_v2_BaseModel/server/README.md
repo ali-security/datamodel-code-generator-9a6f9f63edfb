@@ -14,10 +14,10 @@ Custom templates, base classes, and Python types stay within these two backends.
 | --- | --- | --- | --- | --- |
 | `PetsService` | `list_pets` | GET | `/pets` | `/paths/~1pets/get` |
 | `PublicService` | `get_public` | GET | `/public` | `/paths/~1public/get` |
-| `UntaggedService` | `get_maybe` | GET | `/maybe` | `/paths/~1maybe/get` |
-| `UntaggedService` | `put_pet` | PUT | `/pets/{petId}` | `/paths/~1pets~1{petId}/put` |
-| `UntaggedService` | `get_session` | GET | `/session` | `/paths/~1session/get` |
-| `UntaggedService` | `get_custom` | GET | `/custom` | `/paths/~1custom/get` |
+| `DefaultService` | `get_maybe` | GET | `/maybe` | `/paths/~1maybe/get` |
+| `DefaultService` | `put_pet` | PUT | `/pets/{petId}` | `/paths/~1pets~1{petId}/put` |
+| `DefaultService` | `get_session` | GET | `/session` | `/paths/~1session/get` |
+| `DefaultService` | `get_custom` | GET | `/custom` | `/paths/~1custom/get` |
 
 `operation_dependencies` takes the method names, the keys of `OperationDependencies`; the per-operation generation settings, such as `--server-handler-modes`, take the operation references.
 
@@ -32,7 +32,7 @@ The Protocols of groups with secured operations take the type of the principal y
 
 ```python
 from server import Credentials, RequirementSets, create_app
-from server.services import PetsService, PublicService, UntaggedService
+from server.services import PetsService, PublicService, DefaultService
 
 
 class Pets(PetsService[Principal]):
@@ -43,7 +43,7 @@ class Public(PublicService):
     """Implement `get_public`."""
 
 
-class Untagged(UntaggedService[Principal]):
+class Default(DefaultService[Principal]):
     """Implement `get_maybe`, `put_pet`, `get_session`, and `get_custom`."""
 
 
@@ -51,7 +51,7 @@ def authorize(requirement_sets: RequirementSets, credentials: Credentials) -> Pr
     ...
 
 
-app = create_app(pets=Pets(), public=Public(), untagged=Untagged(), authorize=authorize)
+app = create_app(pets=Pets(), public=Public(), default=Default(), authorize=authorize)
 ```
 
 Run the application with any ASGI server, such as `uvicorn app:app` for a module named `app.py`.
@@ -64,7 +64,7 @@ from fastapi import FastAPI
 from server import build_router
 
 app = FastAPI(lifespan=lifespan, exception_handlers=exception_handlers)
-app.include_router(build_router(pets=Pets(), public=Public(), untagged=Untagged(), authorize=authorize))
+app.include_router(build_router(pets=Pets(), public=Public(), default=Default(), authorize=authorize))
 ```
 
 ## Authentication

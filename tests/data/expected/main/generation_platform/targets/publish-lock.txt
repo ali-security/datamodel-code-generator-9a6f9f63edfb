@@ -11,9 +11,9 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
+  server/routers/default.py
   server/routers/pets.py
   server/routers/store.py
-  server/routers/untagged.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-limit: The served document leaves out x-limit, which has no JSON form
@@ -28,9 +28,9 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
+  server/routers/default.py
   server/routers/pets.py
   server/routers/store.py
-  server/routers/untagged.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -45,9 +45,9 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
+  server/routers/default.py
   server/routers/pets.py
   server/routers/store.py
-  server/routers/untagged.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-limit: The served document leaves out x-limit, which has no JSON form

@@ -103,8 +103,11 @@ file, they are relative to the `pyproject.toml` directory for its tables, and to
 JSON on the command line and for mappings given to `generate()`.
 
 `--client-resource-names` maps a tag to the dotted namespace of the resource its operations join, such as
-`{"pets": "store.pets"}`. `--client-operations` maps an operation reference, the JSON pointer of the path item method
-such as `/paths/~1pets/get`, or a document and a pointer joined by `#`, to the settings of that operation:
+`{"pets": "store.pets"}`. Operations without a tag join the resource `default`, as in `client.default.get_health()`,
+the name the generated FastAPI server gives their group; no `--client-resource-names` entry names them, so the
+`resource` of a `--client-operations` entry moves one of them to another resource. `--client-operations` maps an
+operation reference, the JSON pointer of the path item method such as `/paths/~1pets/get`, or a document and a pointer
+joined by `#`, to the settings of that operation:
 
 | Member | Value |
 |---|---|

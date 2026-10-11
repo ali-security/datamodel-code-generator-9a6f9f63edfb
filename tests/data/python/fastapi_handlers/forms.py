@@ -19,7 +19,7 @@ def _describe(body: object) -> str:
 def services(server: ModuleType, _models: ModuleType, calls: list[str]) -> dict[str, dict[str, object]]:
     """Return a service that records the form model each operation receives."""
 
-    class Untagged(server.services.UntaggedService):
+    class Default(server.services.DefaultService):
         def post_form(self, *, body: object) -> None:
             calls.append(f"post_form({_describe(body)})")
 
@@ -35,4 +35,4 @@ def services(server: ModuleType, _models: ModuleType, calls: list[str]) -> dict[
         def search(self, *, body: object) -> None:
             calls.append(f"search({_describe(body)})")
 
-    return {"default": {"untagged": Untagged()}}
+    return {"default": {"default": Default()}}

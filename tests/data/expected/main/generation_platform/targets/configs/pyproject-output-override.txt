@@ -8,7 +8,7 @@ elsewhere/_generated/openapi.py
 elsewhere/application.py
 elsewhere/py.typed
 elsewhere/routers/__init__.py
+elsewhere/routers/default.py
 elsewhere/routers/pets.py
 elsewhere/routers/store.py
-elsewhere/routers/untagged.py
 elsewhere/services.py

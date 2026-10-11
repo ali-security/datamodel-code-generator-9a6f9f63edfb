@@ -44,8 +44,8 @@ def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[s
         "value": lambda: models.FieldTextsGetResponse("abc"),
     }
     return {
-        "untagged": service(
-            server.services.UntaggedService,
+        "default": service(
+            server.services.DefaultService,
             record,
             get_result=lambda case: results[case](),
             get_plain=lambda case: plain[case](),

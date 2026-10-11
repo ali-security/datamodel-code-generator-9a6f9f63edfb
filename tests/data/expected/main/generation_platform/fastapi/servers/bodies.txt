@@ -1,7 +1,7 @@
 # bodies
 serve pydantic_v2.BaseModel
-service UntaggedService: post_account, post_check, post_form, post_item, post_label, post_native_form, post_note, post_profile, post_raw, post_variant, put_archive, put_blob, put_document, search, upload
-service UntaggedService without its methods: TypeError
+service DefaultService: post_account, post_check, post_form, post_item, post_label, post_native_form, post_note, post_profile, post_raw, post_variant, put_archive, put_blob, put_document, search, upload
+service DefaultService without its methods: TypeError
 > POST /items
   post_item(body=None)
 < 204 - b''

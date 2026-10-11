@@ -39,7 +39,7 @@ def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[s
     return {
         "pets": service(server.services.PetsService, record, list_pets=lambda **_: ["Mimi"]),
         "public": service(server.services.PublicService, record),
-        "untagged": service(server.services.UntaggedService, record),
+        "default": service(server.services.DefaultService, record),
         "authorize": authorize,
         "prefix": "/v2",
     }

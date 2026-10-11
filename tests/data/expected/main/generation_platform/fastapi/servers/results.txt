@@ -1,7 +1,7 @@
 # results
 serve pydantic_v2.BaseModel
-service UntaggedService: get_blob, get_latin, get_nothing, get_plain, get_result, get_text, head_result, post_empty
-service UntaggedService without its methods: TypeError
+service DefaultService: get_blob, get_latin, get_nothing, get_plain, get_result, get_text, head_result, post_empty
+service DefaultService without its methods: TypeError
 > GET /results?case=bare
   get_result(bare)
 < 200 application/json {"id":1}

@@ -4036,6 +4036,18 @@
       },
       {
         "method": "GET",
+        "url": "/defaults"
+      },
+      {
+        "method": "GET",
+        "url": "/defaults/upper"
+      },
+      {
+        "method": "GET",
+        "url": "/untagged"
+      },
+      {
+        "method": "GET",
         "url": "/items/x?itemId=y&page[size]=z&itemId_1=w",
         "headers": {
           "itemId": "v"

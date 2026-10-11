@@ -36,8 +36,8 @@ def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[s
         "thing": lambda: models.Thing(id=1),
     }
     return {
-        "untagged": service(
-            server.services.UntaggedService, record, **dict.fromkeys(OPERATIONS, lambda case: answers[case]())
+        "default": service(
+            server.services.DefaultService, record, **dict.fromkeys(OPERATIONS, lambda case: answers[case]())
         )
     }
 

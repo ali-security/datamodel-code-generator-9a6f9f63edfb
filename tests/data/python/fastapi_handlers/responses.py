@@ -16,7 +16,7 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
     greeting = models.FieldGreetingsGetResponse
     make = greeting if isinstance(greeting, type) else str
 
-    class Untagged(server.services.UntaggedService):
+    class Default(server.services.DefaultService):
         def get_greeting(self, *, mode: object) -> object:
             calls.append(f"get_greeting(mode={'absent' if mode is None else repr(mode)})")
             match mode:
@@ -37,7 +37,7 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
                 return models.Pet(id=1, name="Mimi")
             return server.HTTPResult(status_code=404, body=models.Error(message="Missing"))
 
-    default = {"untagged": Untagged()}
+    default = {"default": Default()}
     return {"standard": default, "plain": default, "included": default}
 
 

@@ -7,10 +7,10 @@ import json
 
 from models import Contact, FieldContactsSearchPostRequest, FieldContactsSearchPostResponse
 from server import create_app
-from server.services import UntaggedService
+from server.services import DefaultService
 
 
-class Contacts(UntaggedService):
+class Contacts(DefaultService):
     def create_contact(self, *, body: Contact) -> Contact:
         return body
 
@@ -49,7 +49,7 @@ async def call(app: object, path: str, media_type: str, body: bytes) -> str:
 
 
 async def main() -> None:
-    app = create_app(untagged=Contacts())
+    app = create_app(default=Contacts())
     contact = {"id": "01ARZ3NDEKTSV4RRFFQ69G5FAV", "mail": "ann@example.com", "born": "2020-02-29", "nickname": "ann"}
     for path, media_type, body in (
         ("/contacts", "application/json", json.dumps(contact).encode()),

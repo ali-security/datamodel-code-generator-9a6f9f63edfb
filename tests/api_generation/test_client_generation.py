@@ -72,6 +72,7 @@ def test_client_input(case: str, tmp_path: Path) -> None:
         "names-unpack",
         "naming",
         "naming-snake",
+        "naming-default",
         "name-errors",
         "method-collisions",
         "method-collisions-suffix",

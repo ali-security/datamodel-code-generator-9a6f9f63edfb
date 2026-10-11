@@ -1,7 +1,7 @@
 # variants-request-response
 serve pydantic_v2.BaseModel
-service UntaggedService: create_pet, get_pet, list_owners
-service UntaggedService without its methods: TypeError
+service DefaultService: create_pet, get_pet, list_owners
+service DefaultService without its methods: TypeError
 > POST /pets
   create_pet(body=PetRequest{'name': "Name{'root': 'Rex'}", 'secret': 's', 'owner': "Owner{'name': 'Ann', 'email': 'a@example.com'}"})
 < 201 application/json {"id":1,"name":"Rex"}
@@ -19,8 +19,8 @@ service UntaggedService without its methods: TypeError
   list_owners()
 < 200 application/json [{"name":"Ann"}]
 serve pydantic_v2.dataclass
-service UntaggedService: create_pet, get_pet, list_owners
-service UntaggedService without its methods: TypeError
+service DefaultService: create_pet, get_pet, list_owners
+service DefaultService without its methods: TypeError
 > POST /pets
   create_pet(body=PetRequest{'name': 'Rex', 'secret': 's', 'owner': "Owner{'name': 'Ann', 'email': 'a@example.com'}"})
 < 201 application/json {"name":"Rex","id":1,"owner":null}

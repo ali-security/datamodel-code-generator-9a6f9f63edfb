@@ -849,6 +849,11 @@
     "model": {"naming_strategy": "primary-first"},
     "modules": false
   },
+  "naming-default": {
+    "input": "naming.yaml",
+    "config": {"resource_names": [{"tag": "close", "namespace": "default"}]},
+    "modules": false
+  },
   "method-collisions": {
     "input": "method-collisions.yaml",
     "modules": [["client", "resources", "default", "_sync.py"], ["client", "types", "default", "_operations.py"]]

@@ -15,8 +15,8 @@ from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
 from ._runtime.server.responses import HTTPResult
 
 
-class UntaggedService(Protocol):
-    """Implement the untagged operations: subclass this Protocol, or give an object its methods."""
+class DefaultService(Protocol):
+    """Implement the default operations: subclass this Protocol, or give an object its methods."""
 
     @abstractmethod
     def get_values(

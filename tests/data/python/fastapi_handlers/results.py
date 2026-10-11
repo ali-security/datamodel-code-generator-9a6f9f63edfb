@@ -58,7 +58,7 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         calls.append(f"{name}({case})")
         return results[case]()
 
-    class Untagged(server.services.UntaggedService):
+    class Default(server.services.DefaultService):
         def get_result(self, *, case: str) -> object:
             return respond("get_result", case)
 
@@ -107,4 +107,4 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         def get_note(self, *, case: str) -> object:
             return respond("get_note", case)
 
-    return {"default": {"untagged": Untagged()}}
+    return {"default": {"default": Default()}}

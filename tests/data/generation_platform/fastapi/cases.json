@@ -71,12 +71,25 @@
         "/paths/~1health/get": "health_check"
       },
       "server_router_names": {
-        "untagged": "misc"
+        "default": "misc"
       },
       "server_parameter_names": {
         "/paths/~1files~1{file.name}~1{dcg_p0}/get": {
           "query:limit": "page_size"
         }
+      }
+    },
+    "package_snapshots": [],
+    "readme": [
+      "pydantic_v2.BaseModel"
+    ]
+  },
+  "names-default": {
+    "input": "naming.yaml",
+    "config": {
+      "server_router_names": {
+        "tag:close": "default",
+        "untagged": "misc"
       }
     },
     "package_snapshots": [],

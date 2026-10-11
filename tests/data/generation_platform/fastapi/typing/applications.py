@@ -24,7 +24,7 @@ from secured import (
     validation_error_handler,
 )
 from secured.routers import pets, public
-from secured.services import PetsService, UntaggedService
+from secured.services import PetsService, DefaultService
 
 
 @dataclass(frozen=True)
@@ -71,7 +71,7 @@ class Public:
         return None
 
 
-class Untagged(UntaggedService[User]):
+class Default(DefaultService[User]):
     async def get_maybe(self, *, principal: User | None, principal_1: str | None) -> PlainTextResponse:
         name = "anonymous" if principal is None else principal.name
         return PlainTextResponse(name if principal_1 is None else principal_1)
@@ -95,7 +95,7 @@ operation_dependencies: OperationDependencies = {"list_pets": dependencies}
 app: FastAPI = create_app(
     pets=Pets(),
     public=Public(),
-    untagged=Untagged(),
+    default=Default(),
     authorize=authorizer,
     operation_dependencies=operation_dependencies,
     prefix="/api",
@@ -115,7 +115,7 @@ app: FastAPI = create_app(
 router: APIRouter = build_router(
     pets=Pets(),  # ty: ignore[invalid-argument-type]
     public=Public(),
-    untagged=Untagged(),  # ty: ignore[invalid-argument-type]
+    default=Default(),  # ty: ignore[invalid-argument-type]
     authorize=async_authorizer,
 )
 pets_router: APIRouter = pets.build_router(pets=Pets(), authorize=authorizer)

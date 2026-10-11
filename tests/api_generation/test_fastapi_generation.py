@@ -30,6 +30,7 @@ EXPECTED = Path(__file__).parents[1] / "data/expected/main/generation_platform/f
         "request",
         "responses",
         "names",
+        "names-default",
         "types",
         "methods",
         "native",

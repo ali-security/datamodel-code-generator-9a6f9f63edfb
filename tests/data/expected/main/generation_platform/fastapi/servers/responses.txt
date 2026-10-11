@@ -1,7 +1,7 @@
 # responses
 serve pydantic_v2.BaseModel
-service UntaggedService: get_document, get_greeting, get_pet
-service UntaggedService without its methods: TypeError
+service DefaultService: get_document, get_greeting, get_pet
+service DefaultService without its methods: TypeError
 app standard
 > GET /greetings
   get_greeting(mode=absent)
@@ -72,8 +72,8 @@ app included
 > openapi /pets/{id} get 404
 < null
 serve pydantic_v2.dataclass
-service UntaggedService: get_document, get_greeting, get_pet
-service UntaggedService without its methods: TypeError
+service DefaultService: get_document, get_greeting, get_pet
+service DefaultService without its methods: TypeError
 app standard
 > GET /greetings
   get_greeting(mode=absent)

@@ -1,7 +1,7 @@
 # forms
 serve pydantic_v2.BaseModel
-service UntaggedService: post_form, post_notes, search, upload, upload_many
-service UntaggedService without its methods: TypeError
+service DefaultService: post_form, post_notes, search, upload, upload_many
+service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
 < 204 - b''
@@ -80,8 +80,8 @@ service UntaggedService without its methods: TypeError
 > POST /searches
 < 422 application/json [{"type": "missing", "loc": ["body", "filter"]}]
 serve pydantic_v2.dataclass
-service UntaggedService: post_form, post_notes, search, upload, upload_many
-service UntaggedService without its methods: TypeError
+service DefaultService: post_form, post_notes, search, upload, upload_many
+service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
 < 204 - b''

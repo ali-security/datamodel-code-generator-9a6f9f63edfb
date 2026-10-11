@@ -123,7 +123,7 @@ def fastapi_upstream_report(root: Path, monkeypatch: pytest.MonkeyPatch) -> str:
     try:
         server, _ = _import(package)
         uploads = _Uploads()
-        app = server.create_app(untagged=uploads)
+        app = server.create_app(default=uploads)
         parsed = _observe(monkeypatch)
         lines = [
             f"{name}: {_outcome(app, uploads, parsed, length, scenario)}"

@@ -1,7 +1,7 @@
 # nullable-results-3-0
 serve pydantic_v2.BaseModel
-service UntaggedService: get_anything, get_list, get_name, get_note, get_pet, get_text, get_thing, get_value, head_text
-service UntaggedService without its methods: TypeError
+service DefaultService: get_anything, get_list, get_name, get_note, get_pet, get_text, get_thing, get_value, head_text
+service DefaultService without its methods: TypeError
 > GET /texts?case=none
   get_text(none)
 < 200 application/json null
@@ -110,8 +110,8 @@ service UntaggedService without its methods: TypeError
   get_note(word)
 < 200 text/plain; charset=utf-8 abc
 serve pydantic_v2.dataclass
-service UntaggedService: get_anything, get_list, get_name, get_note, get_pet, get_text, get_thing, get_value, head_text
-service UntaggedService without its methods: TypeError
+service DefaultService: get_anything, get_list, get_name, get_note, get_pet, get_text, get_thing, get_value, head_text
+service DefaultService without its methods: TypeError
 > GET /texts?case=none
   get_text(none)
 < 200 application/json null

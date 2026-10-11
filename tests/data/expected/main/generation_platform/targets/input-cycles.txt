@@ -6,7 +6,7 @@ check
   MISSING: server/_generated/openapi.py (should be generated)
   MISSING: server/application.py (should be generated)
   MISSING: server/routers/__init__.py (should be generated)
-  MISSING: server/routers/untagged.py (should be generated)
+  MISSING: server/routers/default.py (should be generated)
   MISSING: server/services.py (should be generated)
   MISSING: server/README.md (file does not exist but should be generated)
   MISSING: server/py.typed (file does not exist but should be generated)
@@ -23,7 +23,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-cycle/self: The served document leaves out self, which has no JSON form
@@ -36,7 +36,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 check
@@ -51,7 +51,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -64,7 +64,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-cycle/self: The served document leaves out self, which has no JSON form
@@ -77,7 +77,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 check
@@ -87,7 +87,7 @@ check
   --- server/_generated/openapi.py
   --- server/application.py
   --- server/routers/__init__.py
-  --- server/routers/untagged.py
+  --- server/routers/default.py
   --- server/services.py
   --- server/README.md
   5 runtime modules ['changed']
@@ -101,7 +101,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -114,7 +114,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-cycle/0: The served document leaves out 0, which has no JSON form
@@ -127,7 +127,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 check
@@ -142,7 +142,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -155,7 +155,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-cycle/0: The served document leaves out 0, which has no JSON form
@@ -168,7 +168,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 check
@@ -178,7 +178,7 @@ check
   --- server/_generated/openapi.py
   --- server/application.py
   --- server/routers/__init__.py
-  --- server/routers/untagged.py
+  --- server/routers/default.py
   --- server/services.py
   --- server/README.md
   5 runtime modules ['changed']
@@ -192,7 +192,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -205,7 +205,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-outer/nested/child/back~1to~0outer/0: The served document leaves out 0, which has no JSON form
@@ -218,7 +218,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 check
@@ -233,7 +233,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
 generate
@@ -246,7 +246,7 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']
   DocumentationAnnotationWarning: server: /x-outer/nested/child/back~1to~0outer/0: The served document leaves out 0, which has no JSON form
@@ -259,6 +259,6 @@ tree
   server/application.py
   server/py.typed
   server/routers/__init__.py
-  server/routers/untagged.py
+  server/routers/default.py
   server/services.py
   5 runtime modules ['present']

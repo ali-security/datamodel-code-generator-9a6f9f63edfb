@@ -156,19 +156,12 @@ def tags(operation: OperationContract) -> tuple[str, ...]:
 
 
 def group_key(operation: OperationContract, *, single: bool) -> str:
-    """Return the group of an operation: its first tag, untagged, or all for the single layout."""
+    """Return the group of an operation: its first tag, default without tags, or all for the single layout."""
     if single:
         return "all"
-    return f"tag:{found[0]}" if (found := tags(operation)) else "untagged"
+    return f"tag:{found[0]}" if (found := tags(operation)) else "default"
 
 
 def group_basis(key: str) -> str:
-    """Return the text a group's default name derives from: its first tag, untagged, or service for all."""
-    match key:
-        case "all":
-            return "service"
-        case "untagged":
-            return key
-        case _:
-            pass
-    return key.removeprefix("tag:")
+    """Return the text a group's default name derives from: its first tag, default, or service for all."""
+    return "service" if key == "all" else key.removeprefix("tag:")
