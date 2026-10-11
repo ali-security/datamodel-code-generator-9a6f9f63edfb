@@ -305,6 +305,30 @@ def uploads(package: ModuleType, lines: list[str]) -> None:
     run(lambda: _async_uploads(harness, server, lines))
     _file_terminal(harness, lines)
     run(lambda: _async_file_terminal(harness, lines))
+    _chunk_sizes(harness, lines)
+
+
+def _chunk_sizes(harness: _Uploads, lines: list[str]) -> None:
+    """Use the default chunk size without client defaults, and keep a checkpoint's chunk under a larger chunk size."""
+    lines.append("chunk sizes without client defaults")
+    exchange, server = Exchange(lines), _Server()
+    settings = harness.client_options(helper_defaults={})
+    with exchange.client() as native, harness.package.Client(http_client=native, **settings) as api:
+        helper = api.protocols.files.upload
+        exchange.respond(server, server)
+        handle = helper.start(harness.source(), Tus_Resumable=harness.tus)
+        lines.append(f"  default chunk={handle.checkpoint()['chunk']}")
+        step(lines, "advance the whole content", handle.advance)
+        exchange.respond(server, server)
+        small = helper.start(harness.source(), Tus_Resumable=harness.tus, upload_options=harness.uploads(chunk_bytes=4))
+        step(lines, "advance four bytes", small.advance)
+        state = small.checkpoint()
+        small.close()
+        exchange.respond(server, server)
+        resumed = helper.resume(harness.source(), state)
+        lines.append(f"  chunk resumed under the default={resumed.checkpoint()['chunk']}")
+        step(lines, "advance the checkpoint's chunk", resumed.advance)
+        _drained(exchange, lines)
 
 
 def _file_terminal(

@@ -2157,8 +2157,6 @@ _PLAN: Final[EventPlan[models.Event]] = EventPlan(
 
 def decode_unverified(
     raw_body: bytes,
-    *,
-    options: WebhookOptions | None = None,
 ) -> models.Event:
     """Decode a delivery's event without authenticating it.
 
@@ -2168,5 +2166,4 @@ def decode_unverified(
     return decode_unsigned(
         _PLAN,
         raw_body,
-        options=options,
     )

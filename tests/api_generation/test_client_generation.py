@@ -266,6 +266,7 @@ def test_client_protocols(case: str, tmp_path: Path) -> None:
         ("streams", True),
         ("uploads", True),
         ("webhooks", True),
+        ("webhooks-unsigned", True),
         ("templates-missing", False),
     ],
 )

@@ -3131,7 +3131,8 @@ and its `children`, and the `helpers`, each with its `name`, `docstring`, `metho
 helper with remote cancellation returns. A helper method, like a function of `webhook.jinja2`, has its `name`, whether
 it is a `coroutine`, its `positional` parameters and the `keywords` after `*`, what it `returns`, its `docstring`
 (empty for a webhook function, whose builtin template writes its own), and the runtime `function` it returns the call
-of with its `arguments`. `webhook.jinja2` receives the signature `kind`
+of with its `arguments`. The `keywords` may be empty, as an unsigned webhook function's are, and a template writes
+`*` only when they are not. `webhook.jinja2` receives the signature `kind`
 (`none`, `adapter`, or `builtin`), the helper's `name` and its signature's `algorithm`, and whether deliveries carry a
 `timestamp`; `model_bindings.jinja2` receives the stdlib field maps as `models`, each with its `type` and `value`, and
 the `codecs`, each with its `name`, `annotation`, `value`, and `description`. A builtin template
