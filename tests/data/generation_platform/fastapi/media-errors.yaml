@@ -197,6 +197,61 @@ paths:
                 - {type: object, properties: {name: {type: string}}}
       responses:
         "204": {description: Done.}
+  /extras:
+    post:
+      operationId: postExtras
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: object, properties: {x: {type: integer}}}
+      responses:
+        "204": {description: Done.}
+  /extra-lists:
+    post:
+      operationId: postExtraLists
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {type: object, properties: {x: {type: integer}}}}
+      responses:
+        "204": {description: Done.}
+  /extra-kinds:
+    post:
+      operationId: postExtraKinds
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: [integer, boolean]}
+      responses:
+        "204": {description: Done.}
+  /extra-bases:
+    post:
+      operationId: postExtraBases
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - {$ref: "#/components/schemas/Others"}
+                - {type: object, properties: {name: {type: string}}}
+      responses:
+        "204": {description: Done.}
   /spread:
     post:
       operationId: postSpread
@@ -263,3 +318,8 @@ components:
       type: object
       properties:
         loc: {type: object, properties: {x: {type: integer}}}
+    Others:
+      type: object
+      properties:
+        base: {type: string}
+      additionalProperties: {type: object, properties: {x: {type: integer}}}

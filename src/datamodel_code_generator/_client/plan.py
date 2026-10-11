@@ -17,7 +17,13 @@ from datamodel_code_generator._client.config import absolute
 from datamodel_code_generator._client.model_facts import ALIASES
 from datamodel_code_generator._client.naming import HELPER_ARGUMENTS, RESERVED_ARGUMENTS, RESERVED_MEMBERS
 from datamodel_code_generator._client.security import CredentialSpec, SecurityPlanner
-from datamodel_code_generator._openapi_wire_plan import STYLED, content_types, parameter_plans, property_members
+from datamodel_code_generator._openapi_wire_plan import (
+    STYLED,
+    content_types,
+    form_extras,
+    parameter_plans,
+    property_members,
+)
 from datamodel_code_generator._runtime.client.media import most_specific
 from datamodel_code_generator._runtime.client.multipart import PartPlan
 from datamodel_code_generator._runtime.model_codecs.media import media_kind, normalize_media_type
@@ -108,7 +114,8 @@ class MediaSpec:
     A form-data body or response whose schema has file parts is sent or read as parts: `members` plans each
     declared member, and `extra` any other part, which no plan allows when the schema allows no other properties.
     One sent or read whole has `parts`: of a response, how each member is read, and of a body, the members it
-    writes as JSON.
+    writes as JSON. Its `additional_part` plans any other part: of a response, how it is read, and of a body, that
+    it is written as JSON.
     """
 
     media_type: str
@@ -735,7 +742,7 @@ class Planner:
         additional_part: PartPlan | None = None
         if reason is None and essence == _FORM_DATA and use is not None and use.schema is not None:
             if request:
-                members, extra, parts = self._sent(use, use.schema, media_of=media_of, styles_of=styles_of)
+                members, extra, parts, additional_part = self._sent(use, media_of=media_of, styles_of=styles_of)
             else:
                 members, extra = self._received(use, use.schema)
             if members is None:
@@ -825,24 +832,21 @@ class Planner:
             and (plan := self.header_plans.get(use.id)) is not None
         )
 
-    def _extra_use(self, body: TypeUseBinding, extra: SchemaSite) -> TypeUseBinding | None:
-        """Return the use the other properties of a body are read or sent by, when their schema is bound."""
-        return schema_use(self._schemas, extra.location, body.id.direction, extra.target)
-
     def _sent(
         self,
         use: TypeUseBinding,
-        site: SourceLocation,
         *,
         media_of: Mapping[str, tuple[str, ...]],
         styles_of: Mapping[str, ParameterPlan],
-    ) -> tuple[tuple[PartSpec, ...] | None, PartSpec | None, tuple[PartPlan, ...]]:
+    ) -> tuple[tuple[PartSpec, ...] | None, PartSpec | None, tuple[PartPlan, ...], PartPlan | None]:
         """Return the member plans of a form-data body with file parts, or None when its object is sent whole.
 
         A member holding no files takes values of its field's type, which the part's own type use validates. It
         repeats as that type says, and one whose type has no one kind is written as JSON; a styled member writes the
-        parts its style gives rather than one for each item. A body sent whole comes with the plans of the members it
-        writes as JSON.
+        parts its style gives rather than one for each item. The other properties a schema types are written by the
+        same rule, by the type of their values. A body sent whole comes with the plans of the members it
+        writes as JSON, then that of its other properties when they are JSON, which every declared member's plan
+        then tells apart from them.
         """
         parts = _parts(use)
         declared_extra = parts.extra
@@ -851,12 +855,10 @@ class Planner:
             additional = None
         elif isinstance(declared_extra, PartSchema) and declared_extra.file:
             additional = PartSpec(plan=PartPlan("", repeated=declared_extra.repeated), file=True)
-        elif (
-            isinstance(declared_extra, PartSchema)
-            and (typed := self._extra_use(use, extra := _site(declared_extra, site))) is not None
-        ):
+        elif (extras := form_extras(self.wire.kinds, use)) is not None:
             additional = PartSpec(
-                plan=PartPlan("", repeated=declared_extra.repeated), use=_part_use(use, extra.location, None, typed)
+                plan=PartPlan("", "json" if extras.kind is None else "string", repeated=extras.repeated),
+                use=_part_use(use, extras.source, None, TypeUseBinding(use.id, "bound", extras.type, None)),
             )
         declared = dict(parts.members)
         specs: list[PartSpec] = []
@@ -879,13 +881,14 @@ class Planner:
                 )
             )
         if any(spec.file for spec in specs) or (additional is not None and additional.file):
-            return tuple(specs), additional, ()
+            return tuple(specs), additional, (), None
+        others = None if additional is None or additional.plan.kind != "json" else additional.plan
         written = tuple(
-            PartPlan(spec.plan.name, "json", repeated=spec.plan.repeated)
+            PartPlan(spec.plan.name, spec.plan.kind, repeated=spec.plan.repeated)
             for spec in specs
-            if spec.plan.kind == "json" and spec.plan.style is None
+            if spec.plan.style is None and (others is not None or spec.plan.kind == "json")
         )
-        return None, None, written
+        return None, None, written, others
 
     def _received(
         self, use: TypeUseBinding, site: SourceLocation
@@ -907,9 +910,8 @@ class Planner:
         if declared_extra == "closed":
             additional = None
         elif isinstance(declared_extra, PartSchema):
-            extra = _site(declared_extra, site)
             additional = self._read(
-                use, "", extra.location, declared_extra, self._extra_type(use, extra), required=False
+                use, "", _site(declared_extra, site).location, declared_extra, self._extra_type(use), required=False
             )
         return tuple(
             self._read(
@@ -967,13 +969,12 @@ class Planner:
         if (declared_extra := parts.extra) == "closed":
             return plans, None
         if isinstance(declared_extra, PartSchema):
-            extra = self._extra_type(use, _site(declared_extra, use.schema))
-            return plans, self._part_plan("", extra, declared_extra)
+            return plans, self._part_plan("", self._extra_type(use), declared_extra)
         return plans, PartPlan("")
 
-    def _extra_type(self, body: TypeUseBinding, extra: SchemaSite) -> TypeView | None:
+    def _extra_type(self, body: TypeUseBinding) -> TypeView | None:
         """Return the type the other properties of a body are read as, when their schema is bound."""
-        return None if (use := self._extra_use(body, extra)) is None else use.type
+        return None if (extras := form_extras(self.wire.kinds, body)) is None else extras.type
 
     def _part_plan(self, name: str, value: TypeView | None, part: PartSchema) -> PartPlan:
         """Return how one member's parts are read: text of its type's kind, or JSON, repeated as its type says.

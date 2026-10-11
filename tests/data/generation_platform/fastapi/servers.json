@@ -3067,6 +3067,178 @@
             "application/json"
           ]
         ]
+      },
+      {
+        "method": "POST",
+        "url": "/extras",
+        "files": [
+          [
+            "name",
+            null,
+            "n",
+            null
+          ],
+          [
+            "first",
+            null,
+            "{\"color\": \"blue\", \"minAge\": 3}",
+            "application/json"
+          ],
+          [
+            "second",
+            null,
+            "{\"color\": \"plain\"}",
+            null
+          ],
+          [
+            "third",
+            "blob",
+            "{\"color\": \"file\"}",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extras",
+        "files": [
+          [
+            "first",
+            null,
+            "{",
+            "application/json"
+          ],
+          [
+            "first",
+            null,
+            "{\"color\": \"last\"}",
+            "application/json"
+          ],
+          [
+            "name",
+            null,
+            "{",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extras",
+        "files": [
+          [
+            "first",
+            null,
+            "{",
+            "application/json"
+          ],
+          [
+            "second",
+            null,
+            "{\"minAge\": -1}",
+            "application/json"
+          ],
+          [
+            "third",
+            null,
+            "text",
+            null
+          ],
+          [
+            "fourth",
+            null,
+            "null",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extras",
+        "files": [
+          [
+            "name",
+            null,
+            "n",
+            null
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-lists",
+        "files": [
+          [
+            "name",
+            null,
+            "n",
+            null
+          ],
+          [
+            "first",
+            null,
+            "{\"color\": \"a\"}",
+            "application/json"
+          ],
+          [
+            "first",
+            null,
+            "{\"minAge\": 2}",
+            null
+          ],
+          [
+            "second",
+            "blob",
+            "{}",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-lists",
+        "files": [
+          [
+            "first",
+            null,
+            "{}",
+            "application/json"
+          ],
+          [
+            "first",
+            null,
+            "{\"minAge\": -1}",
+            "application/json"
+          ],
+          [
+            "first",
+            null,
+            "nope",
+            "application/json"
+          ],
+          [
+            "second",
+            null,
+            "[]",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-scores",
+        "content": "name=n&first=1&first=2&second=3",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/extra-scores",
+        "content": "first=1&first=two&second=3.5&name=4",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
       }
     ],
     "package_snapshots": []

@@ -114,6 +114,74 @@ post_choice_files values
   post_choice_files(body=FieldChoiceFilesPostRequest(either=Filter(color='c', minAge=None), level=Level.int_1, words=['a', 'b'], lists=[1, 2], file=None))
   < 204 -
   = None
+post_extras
+  > POST /extras [multipart/form-data; boundary=<boundary>]
+  post_extras(body=FieldExtrasPostRequest(name='n', first=Filter(color='blue', minAge=None), second=Filter(color=None, minAge=3)))
+  < 204 -
+  = None
+post_extras refused
+  > POST /extras [multipart/form-data; boundary=<boundary>]
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","second","minAge"],"msg":"<msg>"}]} [operation_id='postExtras', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","second","minAge"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","second","minAge"],"msg":"<msg>"}]}', truncated=False]
+post_extra_lists
+  > POST /extra-lists [multipart/form-data; boundary=<boundary>]
+  post_extra_lists(body=FieldExtraListsPostRequest(name='n', first=[Filter(color='blue', minAge=None), Filter(color=None, minAge=3)], second=[Filter(color=None, minAge=3)]))
+  < 204 -
+  = None
+post_extra_lists refused
+  > POST /extra-lists [multipart/form-data; boundary=<boundary>]
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]} [operation_id='postExtraLists', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]}', truncated=False]
+post_extra_counts
+  > POST /extra-counts [multipart/form-data; boundary=<boundary>]
+  post_extra_counts(body=FieldExtraCountsPostRequest(name='n', first=1, second=2))
+  < 204 -
+  = None
+post_extra_counts refused
+  > POST /extra-counts [multipart/form-data; boundary=<boundary>]
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","second"],"msg":"<msg>"}]} [operation_id='postExtraCounts', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","second"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","second"],"msg":"<msg>"}]}', truncated=False]
+post_extra_files
+  > POST /extra-files [multipart/form-data; boundary=<boundary>]
+  post_extra_files(body=FieldExtraFilesPostRequest(file=b'\x00', name='n', first=[Filter(color='blue', minAge=None), Filter(color=None, minAge=3)], second=[Filter(color=None, minAge=3)]))
+  < 204 -
+  = None
+post_extra_files refused
+  > POST /extra-files [multipart/form-data; boundary=<boundary>]
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]} [operation_id='postExtraFiles', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1,"minAge"],"msg":"<msg>"}]}', truncated=False]
+post_extra_scores
+  > POST /extra-scores [application/x-www-form-urlencoded]
+  post_extra_scores(body=FieldExtraScoresPostRequest(name='n', first=[1, 2], second=[3]))
+  < 204 -
+  = None
+post_extra_scores refused
+  > POST /extra-scores [application/x-www-form-urlencoded]
+  < 422 application/json
+  ! UnprocessableEntityError: Error code: 422 - {"detail":[{"type":"greater_than_equal","loc":["body","first",1],"msg":"<msg>"}]} [operation_id='postExtraScores', status_code=422, body=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1],"msg":"<msg>"}]}', body_bytes=b'{"detail":[{"type":"greater_than_equal","loc":["body","first",1],"msg":"<msg>"}]}', truncated=False]
+post_extra_bases
+  > POST /extra-bases [multipart/form-data; boundary=<boundary>]
+  post_extra_bases(body=FieldExtraBasesPostRequest(base='b', name='n', first=Filter(color='blue', minAge=None), second=Filter(color=None, minAge=3)))
+  < 204 -
+  = None
+post_closed_form
+  > POST /closed-forms [application/x-www-form-urlencoded]
+  post_closed_form(body=FieldClosedFormsPostRequest(name='n'))
+  < 204 -
+  = None
+post_closed_parts
+  > POST /closed-parts [multipart/form-data; boundary=<boundary>]
+  post_closed_parts(body=FieldClosedPartsPostRequest(name='n'))
+  < 204 -
+  = None
+/closed-forms with another member
+  > POST /closed-forms [application/x-www-form-urlencoded]
+  < 422 application/json
+  = (422, [('extra_forbidden', ['body', 'other'])])
+/closed-parts with another member
+  > POST /closed-parts [multipart/form-data; boundary=<boundary>]
+  < 422 application/json
+  = (422, [('extra_forbidden', ['body', 'other'])])
 post_check
   > POST /checks [application/json]
   post_check(body=Check(code=7, scores=[1, 2]))

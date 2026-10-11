@@ -648,6 +648,10 @@ _KINDS: Final = (
         {"either": {"color": "c"}, "level": 1, "words": ["a", "b"], "lists": [1, 2], "filters": [{"color": "f"}, {}]},
     ),
 )
+_OTHERS: Final = (
+    ("Words", {"name": "n", "first": "s", "second": ["a", "b"]}),
+    ("Filters", {"name": "n", "first": [{"color": "f"}, {}], "second": [{"color": "g"}]}),
+)
 _KIND_PARTS: Final = (
     (_NAMED % b"either" + _JSON, b'{"color":"c"}'),
     (_NAMED % b"level", b'"a"'),
@@ -664,23 +668,31 @@ _KIND_PARTS: Final = (
 def kinded_parts(package: ModuleType, lines: list[str]) -> None:
     """Send and read form-data members by the kind of their types, in a body sent whole and in one sent as parts.
 
-    A member whose type has no one scalar kind is one JSON part, or one for each item when its type is a list.
+    A member whose type has no one scalar kind is one JSON part, or one for each item when its type is a list, and
+    so is each other property of a schema that types them, which a model that keeps none leaves out of a body sent
+    whole.
     """
     bodies = importlib.import_module(f"{package.__name__}.bodies")
     exchange = Exchange(lines)
     with exchange.client() as http, package.Client(http_client=http) as api:
-        for label, value in _KINDS:
+        sent = (
+            *((label, "Choices", "ChoiceFiles", value) for label, value in _KINDS),
+            *((f"other {name.lower()}", name, f"{name[:-1]}Files", value) for name, value in _OTHERS),
+        )
+        for label, whole_name, parts_name, value in sent:
             exchange.respond(raw_response(204))
-            whole = request_body(package, "sendChoices", None, value)
-            record(lines, f"{label} sent whole", lambda whole=whole: api.default.send_choices(body=whole))
+            whole = request_body(package, f"send{whole_name}", None, value)
+            send = getattr(api.default, f"send_{whole_name.lower()}")
+            record(lines, f"{label} sent whole", lambda send=send, whole=whole: send(body=whole))
             exchange.respond(raw_response(204))
             parts = bodies.MultipartBody(
                 tuple(
-                    bodies.FieldPart(name, form_part(package, "sendChoiceFiles", name, item))
+                    bodies.FieldPart(name, form_part(package, f"send{parts_name}", name, item))
                     for name, item in value.items()
                 )
             )
-            record(lines, f"{label} sent as parts", lambda parts=parts: api.default.send_choice_files(body=parts))
+            send = getattr(api.default, f"send_{parts_name[:-5].lower()}_files")
+            record(lines, f"{label} sent as parts", lambda send=send, parts=parts: send(body=parts))
         exchange.respond(raw_response(200, _form(*_KIND_PARTS), "multipart/form-data; boundary=b1"))
         record(lines, "kinds read whole", api.default.read_choices)
         exchange.respond(

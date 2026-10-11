@@ -165,6 +165,118 @@ paths:
                 - {type: object, properties: {file: {type: string, format: binary}}}
       responses:
         "204": {description: Done.}
+  /extras:
+    post:
+      operationId: postExtras
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {$ref: "#/components/schemas/Filter"}
+      responses:
+        "204": {description: Done.}
+  /extra-lists:
+    post:
+      operationId: postExtraLists
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {$ref: "#/components/schemas/Filter"}}
+      responses:
+        "204": {description: Done.}
+  /extra-counts:
+    post:
+      operationId: postExtraCounts
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: integer, minimum: 0}
+      responses:
+        "204": {description: Done.}
+  /extra-files:
+    post:
+      operationId: postExtraFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: {type: string, format: binary}
+                name: {type: string}
+              additionalProperties: {type: array, items: {$ref: "#/components/schemas/Filter"}}
+      responses:
+        "204": {description: Done.}
+  /extra-scores:
+    post:
+      operationId: postExtraScores
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {type: integer, minimum: 0}}
+      responses:
+        "204": {description: Done.}
+  /extra-bases:
+    post:
+      operationId: postExtraBases
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - {$ref: "#/components/schemas/Others"}
+                - {type: object, properties: {name: {type: string}}}
+      responses:
+        "204": {description: Done.}
+  /closed-forms:
+    post:
+      operationId: postClosedForm
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: false
+      responses:
+        "204": {description: Done.}
+  /closed-parts:
+    post:
+      operationId: postClosedParts
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: false
+      responses:
+        "204": {description: Done.}
   /checks:
     post:
       operationId: postCheck
@@ -229,6 +341,11 @@ components:
       properties:
         color: {type: string}
         minAge: {type: integer, minimum: 0}
+    Others:
+      type: object
+      properties:
+        base: {type: string}
+      additionalProperties: {$ref: "#/components/schemas/Filter"}
     Choices:
       type: object
       properties:

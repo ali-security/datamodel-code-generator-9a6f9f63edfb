@@ -48,6 +48,8 @@ if TYPE_CHECKING:
     from collections.abc import Collection, Iterator, Mapping, Sequence
 
     from datamodel_code_generator._target_contract import (
+        Direction,
+        FieldSlot,
         FieldUseBinding,
         FinalModelSymbol,
         FrozenLiteral,
@@ -228,7 +230,7 @@ def _form(
         bound = _schema_use(planner, (use.id,), use.id.use_site)
         styled = {declaration.name or "": declaration for declaration in encodings if _styled(declaration)}
         fields = tuple(_text(member) for member in form_members(planner.kinds, bound) if member.name not in styled)
-        additional = _additional(planner, _encoded(bound).form)
+        additional = _additional(planner, bound)
         members = {name: schema for name, schema, _ in property_members(use)}
         encoded = tuple(_encoding(planner, bound, members, declaration) for declaration in styled.values())
         _distinct(_located(bound), [field.name for field in fields], encoded)
@@ -256,12 +258,14 @@ def _styles(
 
 @dataclass(frozen=True, slots=True)
 class FormMember:
-    """One property of a form's model as it is written: its kind of text, each value's type, and whether it repeats.
+    """One member of a form as it is written: its type, its kind of text, each value's type, and whether it repeats.
 
-    `source` is where its schema, or its items' schema when it repeats, declares the values.
+    `source` is where its schema, or its items' schema when it repeats, declares the values. The member that stands
+    for the form's other properties has no name.
     """
 
     name: str
+    type: TypeView
     kind: LexicalKind | None
     leaf: TypeView
     repeated: bool
@@ -278,15 +282,46 @@ def form_members(kinds: LexicalKinds, use: TypeUseBinding) -> Iterator[FormMembe
     }
     for name, schema, member in property_members(use):
         if (facts := member.model_facts) is not None:
-            yield FormMember(name, *kinds.member(facts.type), recorded.get(name, schema))
+            yield FormMember(name, facts.type, *kinds.member(facts.type), recorded.get(name, schema))
 
 
-def _additional(planner: _WirePlanner, shape: TextShape) -> FieldPlan | None:
-    """Return the plan of a form's other properties, none when it allows none, refusing a form no encoding writes."""
+def form_extras(kinds: LexicalKinds, use: TypeUseBinding) -> FormMember | None:
+    """Return how the other properties of a form are written, by the type of their values.
+
+    The type is the one the form's model keeps them as, in a field of its own or one it inherits. A model without
+    such a field takes the type its direction binds for their schema, where the schema is or where an owner's mapping
+    holds its values. A form whose model keeps none as a type, and that allows no other properties, declares no
+    schema for them, or binds no type for it, has no such member: its other properties are text as they come.
+    """
+    encoding = use.encoding
+    shape = None if encoding is None else encoding.form.additional
+    site = None if shape is None else shape.kind
+    if (kept := kinds.kept(use)) is not None:
+        value, declared = kept
+        return FormMember("", value, *kinds.member(value), declared if site is None else site.source)
+    value = (
+        None
+        if site is None
+        else kinds.bound(
+            use.id.direction,
+            *((location, tuple(step for step in steps if step != "items")) for location, steps in site.leaves),
+        )
+    )
+    return None if site is None or value is None else FormMember("", value, *kinds.member(value), site.source)
+
+
+def _additional(planner: _WirePlanner, use: TypeUseBinding) -> FieldPlan | None:
+    """Return the plan of a form's other properties, refusing a form no encoding writes.
+
+    Other properties without a type are any string, and a form that allows none has no plan for them.
+    """
+    shape = _encoded(use).form
     if (problem := shape.problem) is not None:
         source, message = problem
         raise _PlanError(code="MC_PARAMETER_ENCODING", source=source, message=message)
-    return None if shape.additional is None else _field(planner, shape.additional)
+    if (extras := form_extras(planner.kinds, use)) is not None:
+        return _text(extras)
+    return None if shape.additional is None else FieldPlan("")
 
 
 def _text(member: FormMember) -> FieldPlan:
@@ -673,11 +708,11 @@ class LexicalKinds:
         self._batch = batch
 
     @cached_property
-    def _types(self) -> dict[tuple[int, str], TypeView | None]:
+    def _types(self) -> dict[tuple[int, str, Direction], TypeView | None]:
         return {
-            (use.id.use_site.document, use.id.use_site.pointer): use.type
+            (use.id.use_site.document, use.id.use_site.pointer, use.id.direction): use.type
             for use in self._batch.type_uses
-            if use.id.role == "schema" and use.id.projection == "value" and use.id.direction == "neutral"
+            if use.id.role == "schema" and use.id.projection == "value"
         }
 
     @cached_property
@@ -701,6 +736,49 @@ class LexicalKinds:
         value = next((found for leaf in leaves if (found := self._reached(*leaf)) is not None), None)
         return _one_kind(set(self._leaves(value, frozenset())), mixed=True)
 
+    @cached_property
+    def _extras(self) -> dict[FieldSlot | None, SourceLocation]:
+        return {
+            member.slot: member.schema
+            for member in self._batch.fields
+            if member.member_kind == "additional_properties"
+            and member.schema is not None
+            and member.slot is not None
+            and member.consumer == member.slot.symbol
+        }
+
+    def kept(self, use: TypeUseBinding) -> tuple[TypeView, SourceLocation] | None:
+        """Return the type a use's model keeps the values of its other properties as, and where their schema is.
+
+        The model declares the field that keeps them or inherits it, and the schema is the declaring model's.
+        """
+        return next(
+            (
+                (value, self._extras.get(member.slot, schema))
+                for member in use.members
+                if member.member_kind == "additional_properties"
+                and (facts := member.model_facts) is not None
+                and (schema := member.schema) is not None
+                and (value := self._argument(facts.type, *_ARGUMENTS["values"])) is not None
+            ),
+            None,
+        )
+
+    def bound(self, direction: Direction, *places: tuple[SourceLocation, tuple[LeafStep, ...]]) -> TypeView | None:
+        """Return the type bound for a value at the first of its places that binds one.
+
+        The places of a direction's own models come first, then those of the models both directions share.
+        """
+        return next(
+            (
+                found
+                for side in dict.fromkeys((direction, "neutral"))
+                for location, steps in places
+                if (found := self._reached(location, steps, side)) is not None
+            ),
+            None,
+        )
+
     def member(self, value: TypeView) -> tuple[LexicalKind | None, TypeView, bool]:
         """Return how a form member of a type is written: the kind of its text, each value's type, and its repeats.
 
@@ -712,8 +790,10 @@ class LexicalKinds:
         leaf = value if item is None else item
         return _one_kind(set(self._leaves(leaf, frozenset())), mixed=True), leaf, item is not None
 
-    def _reached(self, location: SourceLocation, steps: tuple[LeafStep, ...]) -> TypeView | None:
-        return self._stepped(self._types.get((location.document, location.pointer)), steps)
+    def _reached(
+        self, location: SourceLocation, steps: tuple[LeafStep, ...], direction: Direction = "neutral"
+    ) -> TypeView | None:
+        return self._stepped(self._types.get((location.document, location.pointer, direction)), steps)
 
     def _stepped(self, value: TypeView | None, steps: tuple[LeafStep, ...]) -> TypeView | None:
         for step in steps:

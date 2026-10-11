@@ -43,8 +43,74 @@ paths:
           content:
             multipart/form-data:
               schema: {$ref: "#/components/schemas/ChoiceFiles"}
+  /words:
+    post:
+      operationId: sendWords
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/Words"}
+      responses:
+        "204":
+          description: Stored.
+  /word-files:
+    post:
+      operationId: sendWordFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/WordFiles"}
+      responses:
+        "204":
+          description: Stored.
+  /filters:
+    post:
+      operationId: sendFilters
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/Filters"}
+      responses:
+        "204":
+          description: Stored.
+  /filter-files:
+    post:
+      operationId: sendFilterFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: {$ref: "#/components/schemas/FilterFiles"}
+      responses:
+        "204":
+          description: Stored.
 components:
   schemas:
+    Words:
+      type: object
+      properties:
+        name: {type: string}
+      additionalProperties: {anyOf: [{type: array, items: {type: string}}, {type: string}]}
+    WordFiles:
+      type: object
+      properties:
+        name: {type: string}
+        file: {type: string, format: binary}
+      additionalProperties: {anyOf: [{type: array, items: {type: string}}, {type: string}]}
+    Filters:
+      type: object
+      properties:
+        name: {type: string}
+      additionalProperties: {type: array, items: {$ref: "#/components/schemas/Filter"}}
+    FilterFiles:
+      type: object
+      properties:
+        name: {type: string}
+        file: {type: string, format: binary}
+      additionalProperties: {type: array, items: {$ref: "#/components/schemas/Filter"}}
     Choices:
       type: object
       properties:

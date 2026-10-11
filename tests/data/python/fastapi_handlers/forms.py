@@ -1,4 +1,7 @@
-"""Services of the forms server: URL-encoded fields, uploaded files, lists of files, and JSON parts, as received."""
+"""Services of the forms server: URL-encoded fields, uploaded files, lists of files, and JSON parts, as received.
+
+The models of the forms that type their other properties hold them where the backend keeps them.
+"""
 
 from __future__ import annotations
 
@@ -34,5 +37,14 @@ def services(server: ModuleType, _models: ModuleType, calls: list[str]) -> dict[
 
         def search(self, *, body: object) -> None:
             calls.append(f"search({_describe(body)})")
+
+        def post_extras(self, *, body: object) -> None:
+            calls.append(f"post_extras({_describe(body)})")
+
+        def post_extra_lists(self, *, body: object) -> None:
+            calls.append(f"post_extra_lists({_describe(body)})")
+
+        def post_extra_scores(self, *, body: object) -> None:
+            calls.append(f"post_extra_scores({_describe(body)})")
 
     return {"default": {"default": Default()}}

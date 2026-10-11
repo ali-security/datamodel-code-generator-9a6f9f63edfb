@@ -78,6 +78,48 @@ paths:
               tags: {contentType: application/json}
       responses:
         "204": {description: Done.}
+  /extras:
+    post:
+      operationId: postExtras
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {$ref: "#/components/schemas/Filter"}
+      responses:
+        "204": {description: Done.}
+  /extra-lists:
+    post:
+      operationId: postExtraLists
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {$ref: "#/components/schemas/Filter"}}
+      responses:
+        "204": {description: Done.}
+  /extra-scores:
+    post:
+      operationId: postExtraScores
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {type: integer}}
+      responses:
+        "204": {description: Done.}
 components:
   schemas:
     Filter:

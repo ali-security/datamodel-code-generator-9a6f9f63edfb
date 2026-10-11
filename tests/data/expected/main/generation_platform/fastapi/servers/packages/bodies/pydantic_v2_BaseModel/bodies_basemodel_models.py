@@ -37,6 +37,16 @@ class Filter(BaseModel):
     minAge: conint(ge=0) | None = None
 
 
+class Others(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, Filter],
+    }
+    base: str | None = None
+
+
 class Level(Enum):
     int_1 = 1
     a = 'a'
@@ -121,6 +131,75 @@ class FieldSearchesPostRequest(BaseModel):
 
 class FieldChoiceFilesPostRequest(Choices):
     file: bytes | None = None
+
+
+class FieldExtrasPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, Filter],
+    }
+    name: str | None = None
+
+
+class FieldExtraListsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[Filter]],
+    }
+    name: str | None = None
+
+
+class FieldExtraCountsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, conint(ge=0)],
+    }
+    name: str | None = None
+
+
+class FieldExtraFilesPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[Filter]],
+    }
+    file: bytes | None = None
+    name: str | None = None
+
+
+class FieldExtraScoresPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[conint(ge=0)]],
+    }
+    name: str | None = None
+
+
+class FieldExtraBasesPostRequest(Others):
+    name: str | None = None
+
+
+class FieldClosedFormsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    name: str | None = None
+
+
+class FieldClosedPartsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    name: str | None = None
 
 
 class FieldNotesPostRequest(RootModel[Item | None]):

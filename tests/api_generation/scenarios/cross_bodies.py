@@ -2,7 +2,9 @@
 
 Each call names the media type it sends where the operation declares several, and the server reports the model or
 value its handler received with the media type it read. Members whose types have no one scalar kind travel as JSON
-parts, in a body sent whole and in one sent part by part.
+parts, in a body sent whole and in one sent part by part, and so do the other properties a form's schema types,
+or a schema it combines with allOf, under whatever names a call gives them. A form that allows no other properties
+refuses a member its schema does not declare, which its model's client never writes.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ if TYPE_CHECKING:
 
 DOCUMENT = "fastapi/server-bodies.yaml"
 CLIENT = {"default_base_url": "https://bodies.example.com"}
+_OTHER = {"name": "n", "other": "x"}
 
 
 def services(server: ModuleType, models: ModuleType, record: Recorder) -> dict[str, object]:
@@ -46,6 +49,8 @@ def calls(kit: Kit) -> Calls:
         filter=models.Filter.model_construct(minAge=-1),
         filters=[models.Filter(), models.Filter.model_construct(minAge=-2)],
     )
+    blue, old = models.Filter(color="blue"), models.Filter(minAge=3)
+    negative = models.Filter.model_construct(minAge=-1)
     choices = (
         ("text", {"either": "plain", "level": models.Level("a"), "words": "s", "lists": ["x"]}),
         (
@@ -118,6 +123,78 @@ def calls(kit: Kit) -> Calls:
                 ),
             )
             for label, choice in choices
+        ),
+        ("post_extras", lambda: api.post_extras(body=models.FieldExtrasPostRequest(name="n", first=blue, second=old))),
+        (
+            "post_extras refused",
+            lambda: api.post_extras(body=models.FieldExtrasPostRequest.model_construct(first=blue, second=negative)),
+        ),
+        (
+            "post_extra_lists",
+            lambda: api.post_extra_lists(
+                body=models.FieldExtraListsPostRequest(name="n", first=[blue, old], second=[old])
+            ),
+        ),
+        (
+            "post_extra_lists refused",
+            lambda: api.post_extra_lists(
+                body=models.FieldExtraListsPostRequest.model_construct(first=[blue, negative])
+            ),
+        ),
+        (
+            "post_extra_counts",
+            lambda: api.post_extra_counts(body=models.FieldExtraCountsPostRequest(name="n", first=1, second=2)),
+        ),
+        (
+            "post_extra_counts refused",
+            lambda: api.post_extra_counts(body=models.FieldExtraCountsPostRequest.model_construct(first=1, second=-2)),
+        ),
+        (
+            "post_extra_files",
+            lambda: api.post_extra_files(
+                body=multipart((
+                    bodies.FilePart("file", b"\x00"),
+                    bodies.FieldPart("name", "n"),
+                    bodies.FieldPart("first", [blue, old]),
+                    bodies.FieldPart("second", [old]),
+                ))
+            ),
+        ),
+        (
+            "post_extra_files refused",
+            lambda: api.post_extra_files(body=multipart((bodies.FieldPart("first", [blue, negative]),))),
+        ),
+        (
+            "post_extra_scores",
+            lambda: api.post_extra_scores(body=models.FieldExtraScoresPostRequest(name="n", first=[1, 2], second=[3])),
+        ),
+        (
+            "post_extra_scores refused",
+            lambda: api.post_extra_scores(body=models.FieldExtraScoresPostRequest.model_construct(first=[1, -2])),
+        ),
+        (
+            "post_extra_bases",
+            lambda: api.post_extra_bases(
+                body=models.FieldExtraBasesPostRequest(base="b", name="n", first=blue, second=old)
+            ),
+        ),
+        ("post_closed_form", lambda: api.post_closed_form(body=models.FieldClosedFormsPostRequest(name="n"))),
+        ("post_closed_parts", lambda: api.post_closed_parts(body=models.FieldClosedPartsPostRequest(name="n"))),
+        *(
+            (
+                f"{path} with another member",
+                lambda path=path, sent=sent: kit.then(
+                    kit.http.post(f"https://bodies.example.com{path}", **sent),
+                    lambda response: (
+                        response.status_code,
+                        [(record["type"], record["loc"]) for record in response.json()["detail"]],
+                    ),
+                ),
+            )
+            for path, sent in (
+                ("/closed-forms", {"data": _OTHER}),
+                ("/closed-parts", {"files": {name: (None, value) for name, value in _OTHER.items()}}),
+            )
         ),
         ("post_check", lambda: api.post_check(body=models.Check(code=7, scores=[1, 2]))),
         ("post_note null", lambda: api.post_note(body=models.FieldNotesPostRequest(None))),

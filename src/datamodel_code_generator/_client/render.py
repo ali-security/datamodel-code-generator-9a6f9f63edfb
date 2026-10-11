@@ -1992,6 +1992,8 @@ class _Registry(_Typing):
         entries: list[tuple[str, str]] = []
         if media.parts:
             entries.append(("parts=", _tuple(_part_plan(module, item) for item in media.parts)))
+        if media.additional_part is not None:
+            entries.append(("additional=", _part_plan(module, media.additional_part)))
         if media.content_types:
             entries.append(("content_types=", _tuple(repr(pair) for pair in media.content_types)))
         if media.encoded:

@@ -99,6 +99,30 @@ def services(server: ModuleType, models: ModuleType, calls: list[str]) -> dict[s
         def post_choice_files(self, **arguments: object) -> None:
             record("post_choice_files", arguments)
 
+        def post_extras(self, **arguments: object) -> None:
+            record("post_extras", arguments)
+
+        def post_extra_lists(self, **arguments: object) -> None:
+            record("post_extra_lists", arguments)
+
+        def post_extra_counts(self, **arguments: object) -> None:
+            record("post_extra_counts", arguments)
+
+        def post_extra_files(self, **arguments: object) -> None:
+            record("post_extra_files", arguments)
+
+        def post_extra_scores(self, **arguments: object) -> None:
+            record("post_extra_scores", arguments)
+
+        def post_extra_bases(self, **arguments: object) -> None:
+            record("post_extra_bases", arguments)
+
+        def post_closed_form(self, **arguments: object) -> None:
+            record("post_closed_form", arguments)
+
+        def post_closed_parts(self, **arguments: object) -> None:
+            record("post_closed_parts", arguments)
+
         async def post_raw(self, *, request: object) -> None:
             body = await request.body()
             calls.append(f"post_raw(request={request.method} {request.url.path}, body={body!r})")

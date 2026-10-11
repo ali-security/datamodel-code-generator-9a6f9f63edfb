@@ -134,6 +134,61 @@ paths:
       responses:
         '204':
           description: An inherited member whose values no text of one kind writes.
+  /extras:
+    post:
+      operationId: submitExtras
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: object, properties: {x: {type: integer}}}
+      responses:
+        '204':
+          description: Other properties whose values no text of one kind writes.
+  /extra-lists:
+    post:
+      operationId: submitExtraLists
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: array, items: {type: object, properties: {x: {type: integer}}}}
+      responses:
+        '204':
+          description: Other properties whose items no text of one kind writes.
+  /extra-kinds:
+    post:
+      operationId: submitExtraKinds
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: [integer, boolean]}
+      responses:
+        '204':
+          description: Other properties whose values are text of several kinds.
+  /extra-bases:
+    post:
+      operationId: submitExtraBases
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - {$ref: '#/components/schemas/Others'}
+                - {type: object, properties: {name: {type: string}}}
+      responses:
+        '204':
+          description: Inherited other properties whose values no text of one kind writes.
   /cycle:
     get:
       operationId: getCycle
@@ -150,6 +205,11 @@ components:
       type: object
       properties:
         loc: {type: object, properties: {x: {type: integer}}}
+    Others:
+      type: object
+      properties:
+        base: {type: string}
+      additionalProperties: {type: object, properties: {x: {type: integer}}}
     Loop:
       anyOf: [{$ref: '#/components/schemas/Back'}]
     Back:

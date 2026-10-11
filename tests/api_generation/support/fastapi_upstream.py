@@ -46,6 +46,15 @@ class _Uploads:
     def search(self, **_: object) -> None:
         return None
 
+    def post_extras(self, **_: object) -> None:
+        return None
+
+    def post_extra_lists(self, **_: object) -> None:
+        return None
+
+    def post_extra_scores(self, **_: object) -> None:
+        return None
+
 
 def _scope(length: int) -> dict[str, Any]:
     return {

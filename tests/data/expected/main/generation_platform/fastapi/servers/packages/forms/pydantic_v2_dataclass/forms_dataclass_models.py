@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from pydantic import conint
+from pydantic import ConfigDict, conint
 from pydantic.dataclasses import dataclass
 from typing_extensions import TypeAliasType
 
@@ -42,3 +42,18 @@ class FieldSearchesPostRequest:
     filters: list[Filter] | None = None
     tags: list[str] | None = None
     file: bytes | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtrasPostRequest:
+    name: str | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtraListsPostRequest:
+    name: str | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtraScoresPostRequest:
+    name: str | None = None

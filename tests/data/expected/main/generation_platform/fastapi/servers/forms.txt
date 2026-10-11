@@ -1,6 +1,6 @@
 # forms
 serve pydantic_v2.BaseModel
-service DefaultService: post_form, post_notes, search, upload, upload_many
+service DefaultService: post_extra_lists, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
 service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
@@ -79,8 +79,29 @@ service DefaultService without its methods: TypeError
 < 422 application/json [{"type": "model_type", "loc": ["body", "filter"]}]
 > POST /searches
 < 422 application/json [{"type": "missing", "loc": ["body", "filter"]}]
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='n', first={'color': 'blue', 'minAge': 3}, second={'color': 'plain', 'minAge': None}, third={'color': 'file', 'minAge': None}))
+< 204 - b''
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='{', first={'color': 'last', 'minAge': None}))
+< 204 - b''
+> POST /extras
+< 422 application/json [{"type": "json_invalid", "loc": ["body", "first"]}, {"type": "greater_than_equal", "loc": ["body", "second", "minAge"]}, {"type": "json_invalid", "loc": ["body", "third"]}, {"type": "model_type", "loc": ["body", "fourth"]}]
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='n'))
+< 204 - b''
+> POST /extra-lists
+  post_extra_lists(FieldExtraListsPostRequest(name='n', first=[{'color': 'a', 'minAge': None}, {'color': None, 'minAge': 2}], second=[{'color': None, 'minAge': None}]))
+< 204 - b''
+> POST /extra-lists
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", 1, "minAge"]}, {"type": "json_invalid", "loc": ["body", "first", 2]}, {"type": "model_type", "loc": ["body", "second", 0]}]
+> POST /extra-scores
+  post_extra_scores(FieldExtraScoresPostRequest(name='n', first=[1, 2], second=[3]))
+< 204 - b''
+> POST /extra-scores
+< 422 application/json [{"type": "int_parsing", "loc": ["body", "first", 1]}, {"type": "int_parsing", "loc": ["body", "second", 0]}]
 serve pydantic_v2.dataclass
-service DefaultService: post_form, post_notes, search, upload, upload_many
+service DefaultService: post_extra_lists, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
 service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
@@ -158,3 +179,25 @@ service DefaultService without its methods: TypeError
 < 422 application/json [{"type": "dataclass_type", "loc": ["body", "filter"]}]
 > POST /searches
 < 422 application/json [{"type": "missing", "loc": ["body", "filter"]}]
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='n'))
+< 204 - b''
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='{'))
+< 204 - b''
+> POST /extras
+< 422 application/json [{"type": "json_invalid", "loc": ["body", "first"]}, {"type": "greater_than_equal", "loc": ["body", "second", "minAge"]}, {"type": "json_invalid", "loc": ["body", "third"]}, {"type": "dataclass_type", "loc": ["body", "fourth"]}]
+> POST /extras
+  post_extras(FieldExtrasPostRequest(name='n'))
+< 204 - b''
+> POST /extra-lists
+  post_extra_lists(FieldExtraListsPostRequest(name='n'))
+< 204 - b''
+> POST /extra-lists
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", 1, "minAge"]}, {"type": "json_invalid", "loc": ["body", "first", 2]}, {"type": "dataclass_type", "loc": ["body", "second", 0]}]
+> POST /extra-scores
+  post_extra_scores(FieldExtraScoresPostRequest(name='n'))
+< 204 - b''
+> POST /extra-scores
+  post_extra_scores(FieldExtraScoresPostRequest(name='4'))
+< 204 - b''

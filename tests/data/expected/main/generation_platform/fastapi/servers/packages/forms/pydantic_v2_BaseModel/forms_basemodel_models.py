@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, RootModel, conint
+from typing import Dict
+
+from pydantic import BaseModel, ConfigDict, RootModel, conint
 
 
 class Filter(BaseModel):
@@ -36,3 +38,33 @@ class FieldSearchesPostRequest(BaseModel):
     filters: list[Filter] | None = None
     tags: list[str] | None = None
     file: bytes | None = None
+
+
+class FieldExtrasPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, Filter],
+    }
+    name: str | None = None
+
+
+class FieldExtraListsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[Filter]],
+    }
+    name: str | None = None
+
+
+class FieldExtraScoresPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[int]],
+    }
+    name: str | None = None

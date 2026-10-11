@@ -448,12 +448,22 @@ names one JSON media type and no style, such as `contentType: application/json`,
 parsed by `TypeAdapter.validate_json` of the member's type, or of its items' type, whatever media type the part names
 and whether it arrives as a field or as a file. A part that is not JSON, or that the type rejects, answers `422` with
 its records at `["body", name]`, or at `["body", name, index]` for a member that repeats, before the rest of the body
-is validated. A part of a property the schema does not declare is read as text, whatever `additionalProperties` says.
+is validated.
+
+A schema can type the properties it does not declare, with `additionalProperties: {...}`. Their parts come under any
+name no declared member has and are read by the same rule, by the type the model keeps their values as, in a field of
+its own or one it inherits from a schema combined with `allOf`: text of that type's kind, a list with one part for
+each item of an array, or JSON, whose records name the part as a declared member's do. So are their fields in a
+URL-encoded form, which an adapter then reads. Without such a schema, a part the schema does not declare is text,
+the last of its name, and the model keeps it, ignores it, or refuses it, as its options and
+`additionalProperties: false` say. The `pydantic_v2.dataclass` models have no field for other properties: the server
+reads and checks typed ones by the type of their schema, and the model leaves them out.
 
 A URL-encoded form carries text alone. For a member without one scalar kind, such as an object, an array of objects,
 or `type: [integer, boolean]`, declared by the schema or by a schema it combines with `allOf`, generation stops with
 `A parameter value needs one unambiguous scalar kind`, as it does for the generated client and for a parameter,
-unless an `encoding` gives the member a style.
+unless an `encoding` gives the member a style. It stops the same way, at `additionalProperties`, for other properties
+of such a type.
 
 The adapters read no `encoding` that names another media type, part headers, `allowReserved`, or a style other than
 the default `form` with `explode: true`, and none that gives any style to a member without one scalar kind, which
