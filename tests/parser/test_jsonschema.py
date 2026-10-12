@@ -1453,6 +1453,62 @@ def test_resolve_type_import_from_defs_no_x_python_import() -> None:
     assert result is None
 
 
+@pytest.mark.parametrize(
+    ("x_python_import", "expected_error"),
+    [
+        (
+            {"module": "os", "name": "getcwd\nprint('DMCG_EXEC')"},
+            "x-python-import must be a dotted Python identifier path",
+        ),
+        (
+            {"module": "os; import sys", "name": "getcwd"},
+            "x-python-import must be a dotted Python identifier path",
+        ),
+        (
+            {"module": "os", "name": ["getcwd"]},
+            "x-python-import must be a dotted Python identifier path",
+        ),
+        (
+            {"module": "myapp.enums"},
+            "x-python-import requires both module and name",
+        ),
+    ],
+)
+def test_resolve_type_import_from_defs_rejects_unsafe_x_python_import(
+    x_python_import: dict[str, Any], expected_error: str
+) -> None:
+    """Test _resolve_type_import_from_defs propagates x-python-import validation errors."""
+    schema_dict: dict[str, Any] = {
+        "type": "object",
+        "properties": {"status": {"$ref": "#/$defs/Status"}},
+        "$defs": {"Status": {"type": "string", "x-python-import": x_python_import}},
+    }
+    parser = JsonSchemaParser(json.dumps(schema_dict))
+    parser.raw_obj = schema_dict
+
+    with pytest.raises(Error, match=expected_error):
+        parser._resolve_type_import_from_defs("Status")
+
+
+def test_get_ref_data_type_rejects_unsafe_x_python_import() -> None:
+    """Test get_ref_data_type does not emit imports for unsafe x-python-import values."""
+    schema_dict: dict[str, Any] = {
+        "type": "object",
+        "properties": {"status": {"$ref": "#/$defs/Status"}},
+        "$defs": {
+            "Status": {
+                "type": "string",
+                "x-python-import": {"module": "os", "name": "getcwd\nprint('DMCG_EXEC')"},
+            }
+        },
+    }
+    parser = JsonSchemaParser(json.dumps(schema_dict))
+    parser.raw_obj = schema_dict
+
+    with pytest.raises(Error, match="x-python-import must be a dotted Python identifier path"):
+        parser.get_ref_data_type("#/$defs/Status")
+
+
 def test_resolve_type_import_from_defs_exception_handling() -> None:
     """Test _resolve_type_import_from_defs handles exceptions gracefully.
 
