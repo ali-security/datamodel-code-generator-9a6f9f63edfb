@@ -25,7 +25,7 @@ def _adapter(type_: object) -> TypeAdapter[Any]:
     if (cached := _ADAPTERS.get(id(type_))) is None:
         from pydantic import TypeAdapter  # ruff: ignore[import-outside-top-level] - Only the selected backend is installed.
 
-        adapter: TypeAdapter[Any] = TypeAdapter(type_)
+        adapter: TypeAdapter[Any] = TypeAdapter(cast("Any", type_))
         _ADAPTERS[id(type_)] = cached = (type_, adapter)
     return cached[1]
 

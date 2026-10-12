@@ -6,7 +6,7 @@ import inspect
 import json
 from collections.abc import Coroutine, Mapping
 from dataclasses import dataclass, field
-from typing import Final, Generic, Literal
+from typing import Any, Final, Generic, Literal, cast
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import ResponseValidationError
@@ -50,7 +50,7 @@ class Declared:
     def adapter(self) -> TypeAdapter[object] | None:
         """Return the adapter of the body model, building and keeping it on first use, or None without a model."""
         if (adapter := self._adapter) is None and (model := self.model) is not None:
-            built: TypeAdapter[object] = TypeAdapter(model)
+            built: TypeAdapter[object] = TypeAdapter(cast("Any", model))
             object.__setattr__(self, "_adapter", built)  # noqa: PLC2801 - Keep the adapter on the frozen value.
             return built
         return adapter
