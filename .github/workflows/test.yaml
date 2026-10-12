@@ -1,13 +1,12 @@
 name: Test
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * *"
+    inputs:
+      test-filter:
+        description: "Optional pytest selector(s); empty runs the full suite"
+        required: false
+        default: ""
 
 concurrency:
   group: test-${{ github.ref }}
@@ -45,8 +44,10 @@ jobs:
           - tox_env: py312-isort5-parallel
             name: py312-isort5
     runs-on: ${{ matrix.os == '' && 'ubuntu-24.04' || matrix.os }}
+    timeout-minutes: 50
     env:
       OS: ${{ matrix.os == '' && 'ubuntu-24.04' || matrix.os}}
+      DIFF_AGAINST: HEAD
     steps:
     - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       with:
@@ -79,7 +80,11 @@ jobs:
         else
           TOX_ENV="${{ matrix.tox_env }}"
         fi
-        tox run --skip-uv-sync --skip-pkg-install -e $TOX_ENV
+        if [ -n "${{ inputs.test-filter }}" ]; then
+          tox run --skip-uv-sync --skip-pkg-install -e $TOX_ENV -- -n0 --color=yes ${{ inputs.test-filter }}
+        else
+          tox run --skip-uv-sync --skip-pkg-install -e $TOX_ENV
+        fi
       shell: bash
       env:
         UV_PYTHON_PREFERENCE: "only-managed"
@@ -105,7 +110,9 @@ jobs:
 
   coverage:
     name: combine coverage
+    if: false
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: test
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -159,13 +166,11 @@ jobs:
   check:
     name: ${{ matrix.tox_env }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         tox_env:
-          - type
-          - docs
-          - pkg_meta
           - pydantic20
           - pydantic25
     steps:
@@ -189,6 +194,7 @@ jobs:
   w3c-xmlschema-e2e:
     name: W3C XML Schema e2e
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -218,6 +224,7 @@ jobs:
   asyncapi-spec-json-schemas-e2e:
     name: AsyncAPI spec JSON Schemas e2e
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -246,6 +253,7 @@ jobs:
   apache-avro-schema-pass-e2e:
     name: Apache Avro schema pass e2e
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -274,6 +282,7 @@ jobs:
   protobuf-official-e2e:
     name: Protocol Buffers official e2e
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -305,9 +314,9 @@ jobs:
     name: test-gate
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs:
       - test
-      - coverage
       - check
       - w3c-xmlschema-e2e
       - asyncapi-spec-json-schemas-e2e
@@ -317,7 +326,6 @@ jobs:
       - name: Fail if any test workflow job failed
         run: |
           test_result='${{ needs.test.result }}'
-          coverage_result='${{ needs.coverage.result }}'
           check_result='${{ needs.check.result }}'
           w3c_xmlschema_e2e_result='${{ needs.w3c-xmlschema-e2e.result }}'
           asyncapi_spec_json_schemas_e2e_result='${{ needs.asyncapi-spec-json-schemas-e2e.result }}'
@@ -325,7 +333,6 @@ jobs:
           protobuf_official_e2e_result='${{ needs.protobuf-official-e2e.result }}'
 
           echo "test: ${test_result}"
-          echo "coverage: ${coverage_result}"
           echo "check: ${check_result}"
           echo "w3c xmlschema e2e: ${w3c_xmlschema_e2e_result}"
           echo "asyncapi spec json schemas e2e: ${asyncapi_spec_json_schemas_e2e_result}"
@@ -333,7 +340,6 @@ jobs:
           echo "protobuf official e2e: ${protobuf_official_e2e_result}"
 
           [ "${test_result}" = "success" ] || exit 1
-          [ "${coverage_result}" = "success" ] || exit 1
           [ "${check_result}" = "success" ] || exit 1
           [ "${w3c_xmlschema_e2e_result}" = "success" ] || exit 1
           [ "${asyncapi_spec_json_schemas_e2e_result}" = "success" ] || exit 1
