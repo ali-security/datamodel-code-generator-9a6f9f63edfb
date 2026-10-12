@@ -456,14 +456,18 @@ its own or one it inherits from a schema combined with `allOf`: text of that typ
 each item of an array, or JSON, whose records name the part as a declared member's do. So are their fields in a
 URL-encoded form, which an adapter then reads. Without such a schema, a part the schema does not declare is text,
 the last of its name, and the model keeps it, ignores it, or refuses it, as its options and
-`additionalProperties: false` say. The `pydantic_v2.dataclass` models have no field for other properties: the server
-reads typed ones by the type of their schema, a JSON part checked by that type, and the model leaves them out.
+`additionalProperties: false` say. The `pydantic_v2.dataclass` models have no field for other properties, so the
+server reads typed ones by the type their schema gives them, the form's own or that of a schema it combines with
+`allOf`: a JSON part is checked by that type, text is passed on as it is read, and the model keeps each value as an
+attribute beside its fields, which its `repr` leaves out.
 
 A URL-encoded form carries text alone. For a member without one scalar kind, such as an object, an array of objects,
 or `type: [integer, boolean]`, declared by the schema or by a schema it combines with `allOf`, generation stops with
 `A parameter value needs one unambiguous scalar kind`, as it does for the generated client and for a parameter,
-unless an `encoding` gives the member a style. It stops the same way, at `additionalProperties`, for other properties
-of such a type.
+unless an `encoding` gives the member a style. It stops the same way, at the `additionalProperties` that types them,
+for other properties of such a type, with either backend. The generated client stops for these members and other
+properties with the same message at the same place. It also refuses a URL-encoded body whose schema has
+`patternProperties` or is not an object, which the server reads.
 
 The adapters read no `encoding` that names another media type, part headers, `allowReserved`, or a style other than
 the default `form` with `explode: true`, and none that gives any style to a member without one scalar kind, which

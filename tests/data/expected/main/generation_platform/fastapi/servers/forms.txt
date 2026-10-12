@@ -1,6 +1,6 @@
 # forms
 serve pydantic_v2.BaseModel
-service DefaultService: post_extra_lists, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
+service DefaultService: post_extra_bases, post_extra_lists, post_extra_patterns, post_extra_profiles, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
 service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
@@ -100,8 +100,26 @@ service DefaultService without its methods: TypeError
 < 204 - b''
 > POST /extra-scores
 < 422 application/json [{"type": "int_parsing", "loc": ["body", "first", 1]}, {"type": "int_parsing", "loc": ["body", "second", 0]}]
+> POST /extra-bases
+  post_extra_bases(FieldExtraBasesPostRequest(base='b', name='n', first={'color': 'blue', 'minAge': None}))
+< 204 - b''
+> POST /extra-bases
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", "minAge"]}, {"type": "json_invalid", "loc": ["body", "second"]}]
+> POST /extra-patterns
+  post_extra_patterns(FieldExtraPatternsPostRequest(name='n', first={'color': 'blue', 'minAge': None}))
+< 204 - b''
+> POST /extra-patterns
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", "minAge"]}]
+> POST /extra-profiles
+  post_extra_profiles(FieldExtraProfilesPostRequest(name='n', first=2), 'application/x-www-form-urlencoded')
+< 204 - b''
+> POST /extra-profiles
+  post_extra_profiles(FieldExtraProfilesPostRequest1(count=3, first=['01', '2']), 'application/x-www-form-urlencoded; profile=words')
+< 204 - b''
+> POST /extra-profiles
+< 422 application/json [{"type": "int_parsing", "loc": ["body", "first"]}]
 serve pydantic_v2.dataclass
-service DefaultService: post_extra_lists, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
+service DefaultService: post_extra_bases, post_extra_lists, post_extra_patterns, post_extra_profiles, post_extra_scores, post_extras, post_form, post_notes, search, upload, upload_many
 service DefaultService without its methods: TypeError
 > POST /forms
   post_form(FieldFormsPostRequest(name='a', count=1, tags=None))
@@ -180,10 +198,10 @@ service DefaultService without its methods: TypeError
 > POST /searches
 < 422 application/json [{"type": "missing", "loc": ["body", "filter"]}]
 > POST /extras
-  post_extras(FieldExtrasPostRequest(name='n'))
+  post_extras(FieldExtrasPostRequest(name='n', first=Filter(color='blue', minAge=3), second=Filter(color='plain', minAge=None), third=Filter(color='file', minAge=None)))
 < 204 - b''
 > POST /extras
-  post_extras(FieldExtrasPostRequest(name='{'))
+  post_extras(FieldExtrasPostRequest(name='{', first=Filter(color='last', minAge=None)))
 < 204 - b''
 > POST /extras
 < 422 application/json [{"type": "json_invalid", "loc": ["body", "first"]}, {"type": "greater_than_equal", "loc": ["body", "second", "minAge"]}, {"type": "json_invalid", "loc": ["body", "third"]}, {"type": "dataclass_type", "loc": ["body", "fourth"]}]
@@ -191,13 +209,32 @@ service DefaultService without its methods: TypeError
   post_extras(FieldExtrasPostRequest(name='n'))
 < 204 - b''
 > POST /extra-lists
-  post_extra_lists(FieldExtraListsPostRequest(name='n'))
+  post_extra_lists(FieldExtraListsPostRequest(name='n', first=[Filter(color='a', minAge=None), Filter(color=None, minAge=2)], second=[Filter(color=None, minAge=None)]))
 < 204 - b''
 > POST /extra-lists
 < 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", 1, "minAge"]}, {"type": "json_invalid", "loc": ["body", "first", 2]}, {"type": "dataclass_type", "loc": ["body", "second", 0]}]
 > POST /extra-scores
-  post_extra_scores(FieldExtraScoresPostRequest(name='n'))
+  post_extra_scores(FieldExtraScoresPostRequest(name='n', first=[1, 2], second=[3]))
 < 204 - b''
 > POST /extra-scores
-  post_extra_scores(FieldExtraScoresPostRequest(name='4'))
+  post_extra_scores(FieldExtraScoresPostRequest(name='4', first=[1, 'two'], second=['3.5']))
+< 204 - b''
+> POST /extra-bases
+  post_extra_bases(FieldExtraBasesPostRequest(base='b', name='n', first=Filter(color='blue', minAge=None)))
+< 204 - b''
+> POST /extra-bases
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", "minAge"]}, {"type": "json_invalid", "loc": ["body", "second"]}]
+> POST /extra-patterns
+  post_extra_patterns(FieldExtraPatternsPostRequest(name='n', first=Filter(color='blue', minAge=None)))
+< 204 - b''
+> POST /extra-patterns
+< 422 application/json [{"type": "greater_than_equal", "loc": ["body", "first", "minAge"]}]
+> POST /extra-profiles
+  post_extra_profiles(FieldExtraProfilesPostRequest(name='n', first=2), 'application/x-www-form-urlencoded')
+< 204 - b''
+> POST /extra-profiles
+  post_extra_profiles(FieldExtraProfilesPostRequest1(count=3, first=['01', '2']), 'application/x-www-form-urlencoded; profile=words')
+< 204 - b''
+> POST /extra-profiles
+  post_extra_profiles(FieldExtraProfilesPostRequest(name='n', first='one'), 'application/x-www-form-urlencoded')
 < 204 - b''

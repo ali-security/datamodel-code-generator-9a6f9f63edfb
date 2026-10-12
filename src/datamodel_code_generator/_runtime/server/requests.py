@@ -188,7 +188,7 @@ class BodyMedia:
 
     A form's members are read as text in the kinds of `fields`, and those of a multipart form in `json_parts` as JSON.
     `additional` reads every member neither names: as text as it comes unless the form's schema types its other
-    properties, and never as JSON in a URL-encoded form.
+    properties, and never as JSON in a URL-encoded form, whose other members `other` reads.
     """
 
     media_type: str
@@ -198,11 +198,13 @@ class BodyMedia:
     json_parts: tuple[JsonPart, ...] = ()
     additional: FieldPlan | JsonPart = _TEXT
     members: Mapping[str, FieldPlan | JsonPart] = field(init=False, repr=False, compare=False)
+    other: FieldPlan = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
-        """Index the members of a multipart form by name once."""
+        """Index the members of a multipart form by name once, and keep the text plan of any other member."""
         members: tuple[FieldPlan | JsonPart, ...] = (*self.fields, *self.json_parts)
         object.__setattr__(self, "members", {item.name: item for item in members})
+        object.__setattr__(self, "other", self.additional if isinstance(self.additional, FieldPlan) else _TEXT)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -277,7 +279,7 @@ async def _read(media: BodyMedia, media_type: str, body: bytes, request: Request
                 raise RequestValidationError([media_invalid(("body",))]) from error
             return _validated(adapter, text)
         case "form":
-            return _validated(adapter, plain(decode_form(body, media.fields, cast("FieldPlan", media.additional))))
+            return _validated(adapter, plain(decode_form(body, media.fields, media.other)))
         case "multipart":
             return _validated(adapter, plain(await _parts(request, media.members, media.additional)))
         case _:

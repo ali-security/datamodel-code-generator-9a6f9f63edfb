@@ -87,8 +87,39 @@ paths:
       responses:
         "204":
           description: Stored.
+  /bases:
+    get:
+      operationId: readBases
+      responses:
+        "200":
+          description: A form that inherits the type of its other properties.
+          content:
+            multipart/form-data:
+              schema: {$ref: "#/components/schemas/Bases"}
+  /base-files:
+    get:
+      operationId: readBaseFiles
+      responses:
+        "200":
+          description: A form with a file that inherits the type of its other properties.
+          content:
+            multipart/form-data:
+              schema: {$ref: "#/components/schemas/BaseFiles"}
 components:
   schemas:
+    Others:
+      type: object
+      properties:
+        base: {type: string}
+      additionalProperties: {$ref: "#/components/schemas/Filter"}
+    Bases:
+      allOf:
+        - {$ref: "#/components/schemas/Others"}
+        - {type: object, properties: {name: {type: string}}}
+    BaseFiles:
+      allOf:
+        - {$ref: "#/components/schemas/Others"}
+        - {type: object, properties: {name: {type: string}, file: {type: string, format: binary}}}
     Words:
       type: object
       properties:

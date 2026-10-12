@@ -3239,6 +3239,102 @@
         "headers": {
           "Content-Type": "application/x-www-form-urlencoded"
         }
+      },
+      {
+        "method": "POST",
+        "url": "/extra-bases",
+        "files": [
+          [
+            "base",
+            null,
+            "b",
+            null
+          ],
+          [
+            "name",
+            null,
+            "n",
+            null
+          ],
+          [
+            "first",
+            null,
+            "{\"color\": \"blue\"}",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-bases",
+        "files": [
+          [
+            "first",
+            null,
+            "{\"minAge\": -1}",
+            "application/json"
+          ],
+          [
+            "second",
+            null,
+            "text",
+            null
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-patterns",
+        "files": [
+          [
+            "name",
+            null,
+            "n",
+            null
+          ],
+          [
+            "first",
+            null,
+            "{\"color\": \"blue\"}",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-patterns",
+        "files": [
+          [
+            "first",
+            null,
+            "{\"minAge\": -1}",
+            "application/json"
+          ]
+        ]
+      },
+      {
+        "method": "POST",
+        "url": "/extra-profiles",
+        "content": "name=n&first=01&first=2",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/extra-profiles",
+        "content": "count=3&first=01&first=2",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded; profile=words"
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/extra-profiles",
+        "content": "name=n&first=one",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
       }
     ],
     "package_snapshots": []

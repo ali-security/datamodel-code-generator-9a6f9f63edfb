@@ -120,8 +120,61 @@ paths:
               additionalProperties: {type: array, items: {type: integer}}
       responses:
         "204": {description: Done.}
+  /extra-bases:
+    post:
+      operationId: postExtraBases
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - {$ref: "#/components/schemas/Others"}
+                - {type: object, properties: {name: {type: string}}}
+      responses:
+        "204": {description: Done.}
+  /extra-patterns:
+    post:
+      operationId: postExtraPatterns
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              patternProperties: {"^x-": {type: string}}
+              additionalProperties: {$ref: "#/components/schemas/Filter"}
+      responses:
+        "204": {description: Done.}
+  /extra-profiles:
+    post:
+      operationId: postExtraProfiles
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              additionalProperties: {type: integer}
+          application/x-www-form-urlencoded; profile=words:
+            schema:
+              type: object
+              properties:
+                count: {type: integer}
+              additionalProperties: {type: array, items: {type: string}}
+      responses:
+        "204": {description: Done.}
 components:
   schemas:
+    Others:
+      type: object
+      properties:
+        base: {type: string}
+      additionalProperties: {$ref: "#/components/schemas/Filter"}
     Filter:
       type: object
       properties:

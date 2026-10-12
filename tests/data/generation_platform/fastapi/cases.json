@@ -129,7 +129,11 @@
     "input": "repeat-32.yaml"
   },
   "media-errors": {
-    "input": "media-errors.yaml"
+    "input": "media-errors.yaml",
+    "backends": [
+      "pydantic_v2.BaseModel",
+      "pydantic_v2.dataclass"
+    ]
   },
   "parameter-errors": {
     "input": "parameter-errors.yaml",

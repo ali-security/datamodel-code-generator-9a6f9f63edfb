@@ -92,6 +92,7 @@ SettingT = TypeVar("SettingT")
 RESERVED: Final = frozenset({"self", "request", "principal", "body", "media_type"})
 BODYLESS_STATUSES: Final = frozenset({204, 205, 304})
 _JSON: Final = "application/json"
+_TEXT: Final = FieldPlan("")
 _LOCATIONS: Final[dict[object, ParameterLocation]] = {
     "path": "path",
     "query": "query",
@@ -213,12 +214,20 @@ class NativeField:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class MediaSpec:
-    """One declared media type of a body or response, with its type use when the content has a schema."""
+    """One declared media type of a body or response, with its type use when the content has a schema.
+
+    A form an adapter reads comes with the plans of its members: a member is read as text in its field's kind, or,
+    as a multipart member without one, as JSON. `additional` reads the properties the form's schema types without
+    declaring them, when that is not as the text they come as, which any other member is.
+    """
 
     media_type: str
     kind: MediaKind
     use: TypeUseBinding | None
     declaration: WireDeclaration
+    fields: tuple[FieldPlan, ...] = ()
+    json_parts: tuple[JsonPartSpec, ...] = ()
+    additional: FieldPlan | JsonPartSpec | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -254,18 +263,11 @@ class JsonPartSpec:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class BodySpec:
-    """A request body: its media, requiredness, decision, and the plans a form adapter reads its members by.
-
-    A member is read as text in its field's kind, or, as a multipart member without one, as JSON. `form_additional`
-    reads the properties the form's schema types without declaring them, and any other member is text as it comes.
-    """
+    """A request body: its media, each form with the plans an adapter reads it by, requiredness, and decision."""
 
     required: bool
     media: tuple[MediaSpec, ...]
     decision: Decision
-    form_fields: tuple[FieldPlan, ...] = ()
-    json_parts: tuple[JsonPartSpec, ...] = ()
-    form_additional: FieldPlan | JsonPartSpec | None = None
 
     @property
     def form(self) -> bool:
@@ -1088,8 +1090,11 @@ class Planner:  # noqa: PLR0904
             for item in media:
                 if item.kind == "form" and (encoded := _encoded(item)) is not None:
                     self.unsupported(operation, (item,), f"the {encoded.name} encoding of ")
-            form = next((item for item in media if item.kind == "form" and item.use is not None), None)
-            return spec if form is None else self.form_read(operation, spec, form)
+            planned = tuple(
+                self.form_read(operation, item) if item.kind == "form" and item.use is not None else item
+                for item in media
+            )
+            return replace(spec, media=planned)
         item = media[0]
         match item.kind:
             case "json" if spec.required and self.takes_null(None if item.use is None else item.use.type):
@@ -1159,19 +1164,20 @@ class Planner:  # noqa: PLR0904
         if (encoded := _encoded(media)) is not None:
             self.unsupported(operation, (media,), f"the {encoded.name} encoding of ")
             return spec
-        read = self.form_read(operation, spec, media)
+        read = self.form_read(operation, media)
         if media.kind == "form" and spec.required and self.form_model(use.type):
             return replace(spec, decision=Decision(transport="fastapi_native"))
-        return read
+        return replace(spec, media=(read,))
 
-    def form_read(self, operation: OperationContract, spec: BodySpec, media: MediaSpec) -> BodySpec:
-        """Return a body with how its form's members are read: each property of its model, then any other property.
+    def form_read(self, operation: OperationContract, media: MediaSpec) -> MediaSpec:
+        """Return a form with how its members are read: each property of its model, then any other property.
 
         A member whose type, or whose items' type, has a lexical kind is text of that kind. Any other, such as an
         object, is JSON in a multipart body, as is a member whose encoding names JSON; a URL-encoded body carries
         text alone, so generation stops for such a member, as it does for a parameter and for the client. An
         encoding's style spreads such a member over parts or pairs that only the request body mode reads. The other
-        properties a schema types are read by the same rule, under whatever names they come.
+        properties a schema types are read by the same rule, under whatever names they come, and need no plan when
+        that reads them as the text they come as.
         """
         assert media.use is not None
         json_members = _json_members(media)
@@ -1185,11 +1191,12 @@ class Planner:  # noqa: PLR0904
             for member in form_members(self.wire.kinds, media.use)
         ]
         extras = form_extras(self.wire.kinds, media.use)
+        additional = None if extras is None else self.form_plan(operation, media, extras)
         return replace(
-            spec,
-            form_fields=tuple(plan for plan in plans if isinstance(plan, FieldPlan)),
+            media,
+            fields=tuple(plan for plan in plans if isinstance(plan, FieldPlan)),
             json_parts=tuple(plan for plan in plans if isinstance(plan, JsonPartSpec)),
-            form_additional=None if extras is None else self.form_plan(operation, media, extras),
+            additional=None if additional == _TEXT else additional,
         )
 
     def form_plan(

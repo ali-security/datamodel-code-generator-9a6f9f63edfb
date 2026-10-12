@@ -8,6 +8,11 @@ from pydantic.dataclasses import dataclass
 from typing_extensions import TypeAliasType
 
 
+@dataclass(config=ConfigDict(extra='allow'))
+class Others:
+    base: str | None = None
+
+
 @dataclass
 class Filter:
     color: str | None = None
@@ -57,3 +62,23 @@ class FieldExtraListsPostRequest:
 @dataclass(config=ConfigDict(extra='allow'))
 class FieldExtraScoresPostRequest:
     name: str | None = None
+
+
+@dataclass
+class FieldExtraBasesPostRequest(Others):
+    name: str | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtraPatternsPostRequest:
+    name: str | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtraProfilesPostRequest:
+    name: str | None = None
+
+
+@dataclass(config=ConfigDict(extra='allow'))
+class FieldExtraProfilesPostRequest1:
+    count: int | None = None

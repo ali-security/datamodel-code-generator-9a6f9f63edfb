@@ -788,7 +788,11 @@
     "input": "server-errors.yaml"
   },
   "codec-errors": {
-    "input": "codec-errors.yaml"
+    "input": "codec-errors.yaml",
+    "backends": [
+      "pydantic_v2.BaseModel",
+      "pydantic_v2.dataclass"
+    ]
   },
   "cookie-names": {
     "input": "cookie-names.yaml"

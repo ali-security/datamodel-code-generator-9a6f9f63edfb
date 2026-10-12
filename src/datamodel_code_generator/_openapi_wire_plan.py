@@ -289,13 +289,12 @@ def form_extras(kinds: LexicalKinds, use: TypeUseBinding) -> FormMember | None:
     """Return how the other properties of a form are written, by the type of their values.
 
     The type is the one the form's model keeps them as, in a field of its own or one it inherits. A model without
-    such a field takes the type its direction binds for their schema, where the schema is or where an owner's mapping
-    holds its values. A form whose model keeps none as a type, and that allows no other properties, declares no
-    schema for them, or binds no type for it, has no such member: its other properties are text as they come.
+    such a field takes the type its direction binds for their schema, the form's own or one of a schema it combines
+    with allOf, where the schema is or where an owner's mapping holds its values. A form whose model keeps none as a
+    type, and that allows no other properties, has no schema for them, or binds no type for it, has no such member:
+    its other properties are text as they come.
     """
-    encoding = use.encoding
-    shape = None if encoding is None else encoding.form.additional
-    site = None if shape is None else shape.kind
+    site = None if (encoding := use.encoding) is None else encoding.extras
     if (kept := kinds.kept(use)) is not None:
         value, declared = kept
         return FormMember("", value, *kinds.member(value), declared if site is None else site.source)
@@ -313,15 +312,16 @@ def form_extras(kinds: LexicalKinds, use: TypeUseBinding) -> FormMember | None:
 def _additional(planner: _WirePlanner, use: TypeUseBinding) -> FieldPlan | None:
     """Return the plan of a form's other properties, refusing a form no encoding writes.
 
-    Other properties without a type are any string, and a form that allows none has no plan for them.
+    Other properties of a type without one kind are refused first, as the server refuses them. Those without a type
+    are any string, and a form that allows none has no plan for them.
     """
     shape = _encoded(use).form
+    extras = form_extras(planner.kinds, use)
+    typed = None if extras is None else _text(extras)
     if (problem := shape.problem) is not None:
         source, message = problem
         raise _PlanError(code="MC_PARAMETER_ENCODING", source=source, message=message)
-    if (extras := form_extras(planner.kinds, use)) is not None:
-        return _text(extras)
-    return None if shape.additional is None else FieldPlan("")
+    return typed or (None if shape.additional is None else FieldPlan(""))
 
 
 def _text(member: FormMember) -> FieldPlan:

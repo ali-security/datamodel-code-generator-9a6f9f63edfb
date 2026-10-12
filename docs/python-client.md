@@ -3428,10 +3428,14 @@ The properties a schema types without declaring them, with `additionalProperties
 whatever names a body gives them, by the type of their values: an object is one `application/json` part, an array of
 objects one for each item, and a union of an array and another type one part. The type is the one the model keeps
 them as, in a field of its own or one it inherits from a schema combined with `allOf`, and for a model without such a
-field, the type of their schema. A URL-encoded form writes them as text of that type's kind, one pair for each item
-of an array, and generation stops with `A parameter value needs one unambiguous scalar kind` at `additionalProperties`
-when the type has none. The generated FastAPI server reads the members of form bodies, these other properties
-included, by this rule too, and stops for the same documents.
+field, the type of their schema, the form's own or that of a schema it combines with `allOf`. A multipart response
+reads them by that type too. A URL-encoded form writes them as text of that type's kind, one pair for each item of an
+array, and generation stops with `A parameter value needs one unambiguous scalar kind` at the `additionalProperties`
+that types them when the type has none. The generated FastAPI server reads the members of form bodies, these other
+properties included, by this rule too, and stops for a member or other properties without one scalar kind with the
+same message at the same place. The client also refuses a URL-encoded body whose schema has `patternProperties`
+(`Pattern properties have no builtin parameter encoding`) or is not an object
+(`A URL-encoded value must be an object`), which the server reads.
 
 A multipart response is read only when the operation declares one, with the standard library's MIME parser: a part's
 bytes are kept as they arrived unless it names a transfer encoding, and a broken body, or a part that is itself a

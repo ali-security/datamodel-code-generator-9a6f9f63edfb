@@ -68,3 +68,47 @@ class FieldExtraScoresPostRequest(BaseModel):
         '__pydantic_extra__': Dict[str, list[int]],
     }
     name: str | None = None
+
+
+class FieldExtraPatternsPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, Filter],
+    }
+    name: str | None = None
+
+
+class FieldExtraProfilesPostRequest(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, int],
+    }
+    name: str | None = None
+
+
+class FieldExtraProfilesPostRequest1(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, list[str]],
+    }
+    count: int | None = None
+
+
+class Others(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    __annotations__ = {
+        '__pydantic_extra__': Dict[str, Filter],
+    }
+    base: str | None = None
+
+
+class FieldExtraBasesPostRequest(Others):
+    name: str | None = None

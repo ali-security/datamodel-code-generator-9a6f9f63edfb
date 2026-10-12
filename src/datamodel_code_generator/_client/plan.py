@@ -895,8 +895,9 @@ class Planner:
     ) -> tuple[tuple[PartSpec, ...] | None, PartSpec | None]:
         """Return the member plans of a form-data response with file parts, or None when its object is read whole.
 
-        A part holding no file is read by the type use of its schema, or of its items' schema when its member repeats;
-        a part of an untyped extra keeps its bytes, as a file part does.
+        A part holding no file is read by the type use of its schema, or of its items' schema when its member repeats.
+        Any other part is read by the type of the other properties' values, as a request writes it, and a part of an
+        untyped extra keeps its bytes, as a file part does.
         """
         parts = _parts(use)
         declared = dict(parts.members)
@@ -907,12 +908,16 @@ class Planner:
         ):
             return None, None
         additional: PartSpec | None = PartSpec(plan=PartPlan("", repeated=True), file=True)
+        extras = form_extras(self.wire.kinds, use)
         if declared_extra == "closed":
             additional = None
-        elif isinstance(declared_extra, PartSchema):
-            additional = self._read(
-                use, "", _site(declared_extra, site).location, declared_extra, self._extra_type(use), required=False
+        elif extras is not None and not (isinstance(declared_extra, PartSchema) and declared_extra.file):
+            additional = PartSpec(
+                plan=PartPlan("", extras.kind or "json", repeated=extras.repeated),
+                use=_part_use(use, extras.source, None, TypeUseBinding(use.id, "bound", extras.leaf, None)),
             )
+        elif isinstance(declared_extra, PartSchema):
+            additional = self._read(use, "", _site(declared_extra, site).location, declared_extra, None, required=False)
         return tuple(
             self._read(
                 use,
@@ -968,13 +973,10 @@ class Planner:
         )
         if (declared_extra := parts.extra) == "closed":
             return plans, None
-        if isinstance(declared_extra, PartSchema):
-            return plans, self._part_plan("", self._extra_type(use), declared_extra)
-        return plans, PartPlan("")
-
-    def _extra_type(self, body: TypeUseBinding) -> TypeView | None:
-        """Return the type the other properties of a body are read as, when their schema is bound."""
-        return None if (extras := form_extras(self.wire.kinds, body)) is None else extras.type
+        if (extras := form_extras(self.wire.kinds, use)) is not None:
+            return plans, PartPlan("", extras.kind or "json", repeated=extras.repeated)
+        untyped = PartPlan("")
+        return plans, self._part_plan("", None, declared_extra) if isinstance(declared_extra, PartSchema) else untyped
 
     def _part_plan(self, name: str, value: TypeView | None, part: PartSchema) -> PartPlan:
         """Return how one member's parts are read: text of its type's kind, or JSON, repeated as its type says.

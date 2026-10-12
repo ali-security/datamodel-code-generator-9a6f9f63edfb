@@ -189,6 +189,21 @@ paths:
       responses:
         '204':
           description: Inherited other properties whose values no text of one kind writes.
+  /extra-patterns:
+    post:
+      operationId: submitExtraPatterns
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+              patternProperties: {'^x-': {type: string}}
+              additionalProperties: {type: object, properties: {x: {type: integer}}}
+      responses:
+        '204':
+          description: Other properties beside patterns whose values no text of one kind writes.
   /cycle:
     get:
       operationId: getCycle
