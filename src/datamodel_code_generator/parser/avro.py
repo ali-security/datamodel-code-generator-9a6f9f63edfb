@@ -574,7 +574,7 @@ class AvroParser(JsonSchemaParser):
             raw_obj = _AvroSchemaConverter().convert(source)
             source.raw_data = raw_obj
             if source.path.parts:
-                self.remote_object_cache[str(self.base_path / source.path)] = raw_obj
+                self.remote_object_cache[str((self.base_path / source.path).resolve())] = raw_obj
             self.raw_obj = raw_obj
             title = str(raw_obj.get("title") or "Model")
             obj_name = self.class_name or title
